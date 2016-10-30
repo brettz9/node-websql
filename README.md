@@ -100,15 +100,28 @@ To create your own custom implementation, use this API:
 
 ```js
 var customOpenDatabase = require('websql/custom');
-var openDatabase = customOpenDatabase(SQLiteDatabase);
+
+// The second argument is an optional options object
+var openDatabase = customOpenDatabase(SQLiteDatabase, {
+    sqlite: {
+        busyTimeout: 1000, // The default in ms
+        trace: cb,
+        profile: cb
+    },
+    websql: {
+        openDelay: cb, // Defaults to `immediate`
+        transactionDelay: cb, // Defaults to `immediate`
+        executeDelay: cb // Defaults to `immediate`
+    }
+});
 ```
 
 This `SQLiteDatabase` implementation needs to be a constructor-style function
 with a constructor signature like so:
 
 ```js
-// takes a single argument: the database name
-var db = new SQLiteDatabase('dbname');
+// takes two arguments: the database name and an optional options object
+var db = new SQLiteDatabase('dbname', {busyTimeout: 1000, trace: cb, profile: cb});
 ```
 
 Then it implements a single function, `exec()`, like so:
