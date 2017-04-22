@@ -57,8 +57,6 @@ in which case it will just use
 ### readTransaction() vs transaction()
 
 Both `readTransaction()` (read-only) and `transaction()` (read-write) are supported.
-`readTransaction()` has some small performance optimizations, so it's worthwhile to
-use if you're not writing any data in a transaction.
 
 Goals
 ----
