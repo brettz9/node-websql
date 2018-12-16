@@ -44,6 +44,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "argsarray": "^0.0.1",
+    "better-sqlite3": "^5.2.0",
     "immediate": "^3.2.2",
     "noop-fn": "^1.0.0",
     "sqlite3": "^4.0.0",
@@ -77,6 +78,8 @@
   },
   "files": [
     "lib",
-    "custom"
+    "custom",
+    "websqlBetterSQLiteDatabase.js",
+    "BetterSQLiteDatabase.js"
   ]
 }

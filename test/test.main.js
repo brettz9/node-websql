@@ -5,7 +5,8 @@ Promise.longStackTraces();
 var assert = require('assert');
 
 /*jshint -W079 */
-var openDatabase = require('../');
+// var openDatabase = require('../');
+var openDatabase = require('../websqlBetterSQLiteDatabase');
 
 function expectError(promise) {
   return promise.then(function () {
