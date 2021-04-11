@@ -1188,6 +1188,34 @@ describe('advanced test suite - actual DB', function () {
     });
   });
 
+  it('handles errors and callback correctly 6', function () {
+    var called = [];
+
+    return new Promise(function (resolve) {
+      try {
+        db.transaction(function (txn) {
+          called.push(1);
+          txn.executeSql("SELECT 1", [], function () {
+            called.push(2);
+            throw new Error("boom");
+          }, function () {
+            called.push(3);
+            return true;
+          });
+        }, function () {
+          called.push(4);
+          resolve(true);
+        }, function () {
+          called.push(5);
+        });
+      } catch (error) {
+        called.push(6);
+      }
+    }).then(function () {
+      assert.deepEqual(called, [1, 2, 4]);
+    });
+  });
+
   it('rolls back after an error 1', function () {
     var called = [];
 
