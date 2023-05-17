@@ -1,6 +1,6 @@
 {
   "name": "websql-configurable",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WebSQL Database API, implemented for Node using sqlite3",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
     "url": "https://github.com/brettz9/node-websql/issues"
   },
   "main": "lib/index.js",
+  "types": "./index.d.ts",
   "browser": {
     "lib/index.js": "lib/browser.js",
     "crypto": false,
