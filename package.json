@@ -1,13 +1,13 @@
 {
-  "name": "websql",
-  "version": "2.0.1",
+  "name": "websql-configurable",
+  "version": "1.0.0",
   "description": "WebSQL Database API, implemented for Node using sqlite3",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nolanlawson/node-websql.git"
+    "url": "git://github.com/brettz9/node-websql.git"
   },
   "bugs": {
-    "url": "https://github.com/nolanlawson/node-websql/issues"
+    "url": "https://github.com/brettz9/node-websql/issues"
   },
   "main": "lib/index.js",
   "browser": {
@@ -38,7 +38,7 @@
     "ensure-coverage": "istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100",
     "coverage": "run-s test-coverage ensure-coverage"
   },
-  "author": "Nolan Lawson <nolan@nolanlawson.com>",
+  "author": "Brett Zamir",
   "license": "Apache-2.0",
   "dependencies": {
     "argsarray": "^0.0.1",

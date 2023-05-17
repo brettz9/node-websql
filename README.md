@@ -1,5 +1,8 @@
-node-websql [![Build status](https://circleci.com/gh/nolanlawson/node-websql.svg?style=svg)](https://app.circleci.com/pipelines/gh/nolanlawson/node-websql)
+websql-configurable
 ====
+
+A fork of [websql](https://github.com/nolanlawson/node-websql) which
+allows for additional configurability.
 
 The [WebSQL Database API][websql], implemented for Node
 using [sqlite3](https://github.com/mapbox/node-sqlite3). In the browser, it falls back to `window.openDatabase`.
@@ -7,13 +10,13 @@ using [sqlite3](https://github.com/mapbox/node-sqlite3). In the browser, it fall
 Install
 ----
 
-    npm install websql
+    npm install websql-configurable
 
 Usage
 ----
 
 ```js
-var openDatabase = require('websql');
+var openDatabase = require('websql-configurable');
 ```
 
 Create a SQLite3 database called `mydb.db`:
