@@ -2,7 +2,7 @@ websql-configurable
 ====
 
 A fork of [websql](https://github.com/nolanlawson/node-websql) which
-allows for additional configurability.
+allows for additional configurability (with types incorporated from [@types/websql](https://www.npmjs.com/package/@types/websql)).
 
 The [WebSQL Database API][websql], implemented for Node
 using [sqlite3](https://github.com/mapbox/node-sqlite3). In the browser, it falls back to `window.openDatabase`.
