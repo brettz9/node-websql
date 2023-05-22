@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "moduleResolution": "node",
+    "module": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "target": "es6",
+    "outDir": "dist"
+  },
+  "include": ["lib/**/*.js", "custom/**/*.js"],
+  "exclude": ["node_modules"]
+}
