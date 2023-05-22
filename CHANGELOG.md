@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+fix: missing `dist` folder
+
 ## 2.0.0
 
 feat: export types
