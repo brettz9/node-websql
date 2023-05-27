@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0
+
+feat: switch to ESM
+
 ## 2.0.1
 
 fix: missing `dist` folder

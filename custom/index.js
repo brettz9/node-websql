@@ -1,1 +1,1 @@
-module.exports = require('../lib/custom');
+export {default} from '../lib/custom.js';
