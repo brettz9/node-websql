@@ -1,3 +1,2 @@
-declare const _exports: typeof import("../lib/custom");
-export = _exports;
+export { default } from "../lib/custom.js";
 //# sourceMappingURL=index.d.ts.map

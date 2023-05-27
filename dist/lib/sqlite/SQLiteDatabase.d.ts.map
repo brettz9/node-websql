@@ -1,1 +1,1 @@
-{"version":3,"file":"SQLiteDatabase.d.ts","sourceRoot":"","sources":["../../../lib/sqlite/SQLiteDatabase.js"],"names":[],"mappings":";AAQA,4DAYC;;IAZD,kCAYC;IAVC,sBAAqC;IAuCvC,uDA8CC"}
+{"version":3,"file":"SQLiteDatabase.d.ts","sourceRoot":"","sources":["../../../lib/sqlite/SQLiteDatabase.js"],"names":[],"mappings":";AAMA,4DAYC;;IAZD,kCAYC;IAVC,sBAAqC;IAuCvC,uDA8CC;;oBA7FmB,SAAS"}

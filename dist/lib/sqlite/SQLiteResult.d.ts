@@ -1,4 +1,4 @@
-export = SQLiteResult;
+export default SQLiteResult;
 declare function SQLiteResult(error: any, insertId: any, rowsAffected: any, rows: any): void;
 declare class SQLiteResult {
     constructor(error: any, insertId: any, rowsAffected: any, rows: any);

@@ -1,4 +1,4 @@
-export = WebSQLTransaction;
+export default WebSQLTransaction;
 declare function WebSQLTransaction(websqlDatabase: any, executeDelay: any): void;
 declare class WebSQLTransaction {
     constructor(websqlDatabase: any, executeDelay: any);

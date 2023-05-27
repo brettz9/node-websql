@@ -1,4 +1,4 @@
-export = WebSQLDatabase;
+export default WebSQLDatabase;
 declare function WebSQLDatabase(dbVersion: any, db: any, webSQLOverrides: any): void;
 declare class WebSQLDatabase {
     constructor(dbVersion: any, db: any, webSQLOverrides: any);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+fix: update type files
+
 ## 3.0.0
 
 feat: switch to ESM

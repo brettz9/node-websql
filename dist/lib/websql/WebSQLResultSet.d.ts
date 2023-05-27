@@ -1,4 +1,4 @@
-export = WebSQLResultSet;
+export default WebSQLResultSet;
 declare function WebSQLResultSet(insertId: any, rowsAffected: any, rows: any): void;
 declare class WebSQLResultSet {
     constructor(insertId: any, rowsAffected: any, rows: any);

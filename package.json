@@ -1,6 +1,6 @@
 {
   "name": "websql-configurable",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "WebSQL Database API, implemented for Node using sqlite3",
   "repository": {
     "type": "git",
