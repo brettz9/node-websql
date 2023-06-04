@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.2
+
+fix: update type files
+fix: expose `./lib/websql/WebSQLDatabase.js`
+
 ## 3.0.1
 
 fix: update type files
