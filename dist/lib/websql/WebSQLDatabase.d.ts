@@ -15,30 +15,23 @@ declare class WebSQLDatabase {
     _createTransaction(readOnly: any, txnCallback: any, errorCallback: any, successCallback: any, nonstandardTransCb: any): void;
     /**
      * @param {(trans: import('./WebSQLTransaction.js').default) => void} txnCallback
-     * @param {(err: Error & {
-     *   code: number,
-     *   name: string
-     * }|true) => void} errorCallback
-     * @param {() => void} successCallback
+     * @param {(err: SQLError) => void} [errorCallback]
+     * @param {() => void} [successCallback]
      * @param {(
      *   currentTask: TransactionTask,
-     *   err: Error & {
-     *     code: number,
-     *     name: string
-     *   },
+     *   err: Error,
      *   done: () => void,
-     *   rollback: (err: boolean, cb: () => void) => void,
+     *   rollback: (err: boolean|Error|SQLError, cb: () => void) => void,
      *   commit: (cb: () => void) => void
-     * ) => boolean} nonstandardTransCb
+     * ) => boolean} [nonstandardTransCb]
      */
-    transaction(txnCallback: (trans: import('./WebSQLTransaction.js').default) => void, errorCallback: (err: (Error & {
-        code: number;
-        name: string;
-    }) | true) => void, successCallback: () => void, nonstandardTransCb: (currentTask: TransactionTask, err: Error & {
-        code: number;
-        name: string;
-    }, done: () => void, rollback: (err: boolean, cb: () => void) => void, commit: (cb: () => void) => void) => boolean): void;
-    readTransaction(txnCallback: any, errorCallback: any, successCallback: any): void;
+    transaction(txnCallback: (trans: import('./WebSQLTransaction.js').default) => void, errorCallback?: ((err: SQLError) => void) | undefined, successCallback?: (() => void) | undefined, nonstandardTransCb?: ((currentTask: TransactionTask, err: Error, done: () => void, rollback: (err: boolean | Error | SQLError, cb: () => void) => void, commit: (cb: () => void) => void) => boolean) | undefined): void;
+    /**
+     * @param {(trans: import('./WebSQLTransaction.js').default) => void} txnCallback
+     * @param {(err: Error) => void} [errorCallback]
+     * @param {() => void} [successCallback]
+     */
+    readTransaction(txnCallback: (trans: import('./WebSQLTransaction.js').default) => void, errorCallback?: ((err: Error) => void) | undefined, successCallback?: (() => void) | undefined): void;
 }
 declare function TransactionTask(readOnly: any, txnCallback: any, errorCallback: any, successCallback: any, nonstandardTransCb: any): void;
 declare class TransactionTask {

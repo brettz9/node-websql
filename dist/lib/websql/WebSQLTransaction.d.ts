@@ -8,7 +8,13 @@ declare class WebSQLTransaction {
     _runningTimeout: boolean;
     _executeDelay: any;
     _sqlQueue: any;
-    executeSql(sql: any, args: any, sqlCallback: any, sqlErrorCallback: any): void;
+    /**
+     * @param {string} sql
+     * @param {ObjectArray} args
+     * @param {SQLStatementCallback} sqlCallback
+     * @param {SQLStatementErrorCallback} sqlErrorCallback
+     */
+    executeSql(sql: string, args: ObjectArray, sqlCallback: SQLStatementCallback, sqlErrorCallback: SQLStatementErrorCallback): void;
     _checkDone(): void;
 }
 //# sourceMappingURL=WebSQLTransaction.d.ts.map

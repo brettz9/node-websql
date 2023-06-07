@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.3
+
+fix: update type files
+
 ## 3.0.2
 
 fix: update type files
