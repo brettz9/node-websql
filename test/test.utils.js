@@ -1,7 +1,5 @@
-/* jshint -W079 */
-'use strict';
+import PouchDB from './pouchdb.js';
 
-var PouchDB = require('./pouchdb');
 var testUtils = {};
 
 function uniq(list) {
@@ -118,15 +116,15 @@ testUtils.readBlob = function (blob, callback) {
   } else {
     var reader = new FileReader();
     reader.onloadend = function () {
-      
+
       var binary = "";
       var bytes = new Uint8Array(this.result || '');
       var length = bytes.byteLength;
-      
+
       for (var i = 0; i < length; i++) {
         binary += String.fromCharCode(bytes[i]);
       }
-      
+
       callback(binary);
     };
     reader.readAsArrayBuffer(blob);
@@ -303,4 +301,4 @@ testUtils.promisify = function (fun, context) {
   };
 };
 
-module.exports = testUtils;
+export default testUtils;

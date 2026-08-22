@@ -1,8 +1,8 @@
-'use strict';
+import PouchDB from './pouchdb.js';
+import chai from 'chai';
+import testUtils from './test.utils.js';
 
-var PouchDB = require('./pouchdb');
-var should = require('chai').should();
-var testUtils = require('./test.utils.js');
+var should = chai.should();
 var adapters = ['local'];
 
 function makeDocs(start, end, templateDoc) {
@@ -13,7 +13,6 @@ function makeDocs(start, end, templateDoc) {
   }
   var docs = [];
   for (var i = start; i < end; i++) {
-    /*jshint evil:true */
     var newDoc = eval('(' + templateDocSrc + ')');
     newDoc._id = i.toString();
     newDoc.integer = i;

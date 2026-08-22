@@ -1,7 +1,7 @@
-'use strict';
+const isBrowser = typeof process === 'undefined' || process.browser;
 
-if (typeof process === 'undefined' || process.browser) {
-  module.exports = require('./pouchdb-browser');
-} else {
-  module.exports = require('./pouchdb-node');
-}
+const { default: PouchDB } = isBrowser ?
+  await import('./pouchdb-browser.js') :
+  await import('./pouchdb-node.js');
+
+export default PouchDB;

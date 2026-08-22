@@ -1,22 +1,18 @@
-'use strict';
-
-/* jshint ignore:start */
-
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var jsExtend = require('js-extend');
+import jsExtend from 'js-extend';
 var jsExtend__default = _interopDefault(jsExtend);
-var debug = _interopDefault(require('debug'));
-var inherits = _interopDefault(require('inherits'));
-var lie = _interopDefault(require('lie'));
-var pouchdbCollections = require('pouchdb-collections');
-var getArguments = _interopDefault(require('argsarray'));
-var events = require('events');
-var scopedEval = _interopDefault(require('scope-eval'));
-var pouchCollate = require('pouchdb-collate');
+import debug from 'debug';
+import inherits from 'inherits';
+import lie from 'lie';
+import pouchdbCollections from 'pouchdb-collections';
+import getArguments from 'argsarray';
+import events from 'events';
+import scopedEval from 'scope-eval';
+import pouchCollate from 'pouchdb-collate';
 var pouchCollate__default = _interopDefault(pouchCollate);
-var Md5 = _interopDefault(require('spark-md5'));
-var vuvuzela = _interopDefault(require('vuvuzela'));
+import Md5 from 'spark-md5';
+import vuvuzela from 'vuvuzela';
 
 /* istanbul ignore next */
 var PouchPromise = typeof Promise === 'function' ? Promise : lie;
@@ -327,7 +323,7 @@ function evalFilter(input) {
 }
 
 function evalView(input) {
-  /* jshint evil:true */
+
   return new Function('doc', [
     'var emitted = false;',
     'var emit = function (a, b) {',
@@ -3000,7 +2996,7 @@ var qName ="queryKey";
 var qParser = /(?:^|&)([^&=]*)=?([^&]*)/g;
 
 // use the "loose" parser
-/* jshint maxlen: false */
+
 var parser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
 
 function parseUri(str) {
@@ -4113,7 +4109,7 @@ function replicateWrapper(src, target, opts, callback) {
   opts = clone(opts);
   opts.continuous = opts.continuous || opts.live;
   opts.retry = ('retry' in opts) ? opts.retry : false;
-  /*jshint validthis:true */
+
   opts.PouchConstructor = opts.PouchConstructor || this;
   var replicateRet = new Replication(opts);
   var srcPouch = toPouch(src, opts);
@@ -4138,7 +4134,7 @@ function sync(src, target, opts, callback) {
     opts = {};
   }
   opts = clone(opts);
-  /*jshint validthis:true */
+
   opts.PouchConstructor = opts.PouchConstructor || this;
   src = replication.toPouch(src, opts);
   target = replication.toPouch(target, opts);
@@ -10510,6 +10506,6 @@ Object.keys(adapters).forEach(function (adapterName) {
 
 PouchDB.preferredAdapters = ['websql'];
 
-module.exports = PouchDB;
+export default PouchDB;
 
-/* jshint ignore:end */
+

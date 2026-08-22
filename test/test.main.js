@@ -1,11 +1,9 @@
-'use strict';
+import Promise from 'bluebird';
+import assert from 'assert';
 
-var Promise = require('bluebird');
+import openDatabase from '../lib/index.js';
+
 Promise.longStackTraces();
-var assert = require('assert');
-
-/*jshint -W079 */
-var openDatabase = require('../');
 
 function expectError(promise) {
   return promise.then(function () {

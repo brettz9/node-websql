@@ -1,8 +1,8 @@
-'use strict';
+import PouchDB from './pouchdb.js';
+import chai from 'chai';
+import testUtils from './test.utils.js';
 
-var PouchDB = require('./pouchdb');
-var should = require('chai').should();
-var testUtils = require('./test.utils.js');
+var should = chai.should();
 var adapters = ['local'];
 
 adapters.forEach(function (adapter) {
@@ -30,7 +30,6 @@ adapters.forEach(function (adapter) {
     });
 
     it('Create a pouch without new keyword', function () {
-      /* jshint newcap:false */
       var db = PouchDB(dbs.name);
       db.should.be.an.instanceof(PouchDB);
     });
@@ -1088,7 +1087,6 @@ adapters.forEach(function (adapter) {
 
     it('3968, keeps all object fields', function () {
       var db =  new PouchDB(dbs.name);
-      /* jshint -W001 */
       var doc = {
         _id: "x",
         type: "testdoc",

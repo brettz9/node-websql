@@ -1,18 +1,12 @@
-'use strict';
-
-/* jshint ignore:start */
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var jsExtend = require('js-extend');
-var inherits = _interopDefault(require('inherits'));
-var vuvuzela = _interopDefault(require('vuvuzela'));
-var events = require('events');
-var lie = _interopDefault(require('lie'));
-var getArguments = _interopDefault(require('argsarray'));
-var pouchdbCollections = require('pouchdb-collections');
-var crypto = _interopDefault(require('crypto'));
-var openDatabase = _interopDefault(require('../'));
+import jsExtend from 'js-extend';
+import inherits from 'inherits';
+import vuvuzela from 'vuvuzela';
+import events from 'events';
+import lie from 'lie';
+import getArguments from 'argsarray';
+import pouchdbCollections from 'pouchdb-collections';
+import crypto from 'crypto';
+import openDatabase from '../lib/index.js';
 
 function isBinaryObject(object) {
   return object instanceof Buffer;
@@ -3073,6 +3067,4 @@ WebSqlPouch.use_prefix = !!(typeof process === 'undefined' || process.browser);
 
 WebSqlPouch.valid = valid;
 
-module.exports = WebSqlPouch;
-
-/* jshint ignore:end */
+export default WebSqlPouch;

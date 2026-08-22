@@ -1,8 +1,8 @@
-'use strict';
+import PouchDB from './pouchdb.js';
+import chai from 'chai';
+import testUtils from './test.utils.js';
 
-var PouchDB = require('./pouchdb');
-var should = require('chai').should();
-var testUtils = require('./test.utils.js');
+var should = chai.should();
 var adapters = [
   ['local', 'local']
 ];
