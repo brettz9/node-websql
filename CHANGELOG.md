@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.4
+
+fix: stop `WebSQLTransaction` from permanently locking itself out of further
+`executeSql()` calls once its SQL queue is merely found empty; only mark it
+complete once the (optional, nonstandard) 4th `transaction()`/`readTransaction()`
+callback has actually committed, rolled back, or confirmed there is no more
+work coming, so a caller that defers that decision can still submit more SQL
+afterward and have it run
+
 ## 3.0.3
 
 fix: update type files
