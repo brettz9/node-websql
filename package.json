@@ -1,6 +1,6 @@
 {
   "name": "websql-configurable",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "WebSQL Database API, implemented for Node using sqlite3",
   "repository": {
     "type": "git",
@@ -23,6 +23,14 @@
     "./lib/websql/WebSQLDatabase.js": {
       "types": "./dist/lib/websql/WebSQLDatabase.d.ts",
       "import": "./lib/websql/WebSQLDatabase.js"
+    },
+    "./lib/websql/WebSQLTransaction.js": {
+      "types": "./dist/lib/websql/WebSQLTransaction.d.ts",
+      "import": "./lib/websql/WebSQLTransaction.js"
+    },
+    "./lib/websql/WebSQLResultSet.js": {
+      "types": "./dist/lib/websql/WebSQLResultSet.d.ts",
+      "import": "./lib/websql/WebSQLResultSet.js"
     },
     "./lib/sqlite/SQLiteDatabase.js": {
       "types": "./dist/lib/sqlite/SQLiteDatabase.d.ts",

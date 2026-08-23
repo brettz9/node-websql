@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.5
+
+fix: expose `./lib/websql/WebSQLTransaction.js` and `./lib/websql/WebSQLResultSet.js`
+
 ## 3.0.4
 
 fix: stop `WebSQLTransaction` from permanently locking itself out of further
