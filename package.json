@@ -67,6 +67,9 @@
     "statements": 100,
     "branches": 100
   },
+  "engines": {
+    "node": "^22.18.0 || >= 24.11.0"
+  },
   "author": "Brett Zamir",
   "license": "Apache-2.0",
   "dependencies": {
@@ -106,7 +109,7 @@
     "scope-eval": "0.0.3",
     "spark-md5": "2.0.2",
     "sublevel-pouchdb": "1.0.0",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vuvuzela": "1.0.3"
   },
   "files": [
@@ -116,6 +119,7 @@
   ],
   "allowScripts": {
     "fsevents@2.3.2": true,
-    "sqlite3@5.1.7": true
+    "sqlite3@5.1.7": true,
+    "unrs-resolver@1.12.2": true
   }
 }
