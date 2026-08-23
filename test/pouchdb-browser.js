@@ -14,7 +14,7 @@ var pouchCollate__default = _interopDefault(pouchCollate);
 import Md5 from 'spark-md5';
 import vuvuzela from 'vuvuzela';
 
-/* istanbul ignore next */
+/* c8 ignore next */
 var PouchPromise = typeof Promise === 'function' ? Promise : lie;
 
 // like underscore/lodash _.pick()
@@ -102,7 +102,7 @@ function clone(object) {
 function once(fun) {
   var called = false;
   return getArguments(function (args) {
-    /* istanbul ignore if */
+    /* istanbul ignore next 4 */
     if (called) {
       // this is a smoke test and should never actually happen
       throw new Error('once called more than once');
@@ -167,7 +167,7 @@ var log = debug('pouchdb:api');
 
 function adapterFun(name, callback) {
   function logApiCall(self, name, args) {
-    /* istanbul ignore if */
+    /* istanbul ignore next 18 */
     if (log.enabled) {
       var logArgs = [self._db_name, name];
       for (var i = 0; i < args.length - 1; i++) {
@@ -219,7 +219,7 @@ function upsert(db, docId, diffFun) {
   return new PouchPromise(function (fulfill, reject) {
     db.get(docId, function (err, doc) {
       if (err) {
-        /* istanbul ignore next */
+        /* c8 ignore next */
         if (err.status !== 404) {
           return reject(err);
         }
@@ -252,7 +252,7 @@ function tryAndPut(db, doc, diffFun) {
       rev: res.rev
     };
   }, function (err) {
-    /* istanbul ignore next */
+    /* c8 ignore next */
     if (err.status !== 409) {
       throw err;
     }
@@ -821,7 +821,7 @@ Changes.prototype.doChanges = function (opts) {
   if (opts.continuous && opts.since !== 'now') {
     this.db.info().then(function (info) {
       self.startSeq = info.update_seq;
-      /* istanbul ignore next */
+      /* c8 ignore next */
     }, function (err) {
       if (err.id === 'idbNull') {
         // db closed before this returned thats ok
@@ -876,7 +876,7 @@ Changes.prototype.filterChanges = function (opts) {
       if (self.isCancelled) {
         return callback(null, {status: 'cancelled'});
       }
-      /* istanbul ignore next */
+      /* c8 ignore next */
       if (err) {
         return callback(generateErrorFromResponse(err));
       }
@@ -897,7 +897,7 @@ Changes.prototype.filterChanges = function (opts) {
       if (self.isCancelled) {
         return callback(null, {status: 'cancelled'});
       }
-      /* istanbul ignore next */
+      /* c8 ignore next */
       if (err) {
         return callback(generateErrorFromResponse(err));
       }
@@ -1697,7 +1697,7 @@ AbstractPouchDB.prototype.revsDiff =
         if (err && err.status === 404 && err.message === 'missing') {
           missing.set(id, {missing: req[id]});
         } else if (err) {
-          /* istanbul ignore next */
+          /* c8 ignore next */
           return callback(err);
         } else {
           processDoc(id, rev_tree);
@@ -2066,7 +2066,7 @@ AbstractPouchDB.prototype.id = adapterFun('id', function (callback) {
 });
 
 AbstractPouchDB.prototype.type = function () {
-  /* istanbul ignore next */
+  /* c8 ignore next */
   return (typeof this._type === 'function') ? this._type() : this.adapter;
 };
 
@@ -2198,7 +2198,7 @@ AbstractPouchDB.prototype.destroy =
       var PouchDB = self.constructor;
       var deletedMap = Object.keys(dependentDbs).map(function (name) {
         // use_prefix is only false in the browser
-        /* istanbul ignore next */
+        /* c8 ignore next */
         var trueName = usePrefix ?
           name.replace(new RegExp('^' + PouchDB.prefix), '') : name;
         return new PouchDB(trueName, self.__opts).destroy();
@@ -2245,7 +2245,7 @@ TaskQueue.prototype.addTask = function (fun) {
 };
 
 function defaultCallback(err) {
-  /* istanbul ignore next */
+  /* c8 ignore next */
   if (err && global.debug) {
     console.error(err);
   }
@@ -2897,7 +2897,7 @@ function ajaxCore(options, callback) {
       return cb(err);
     }
     // We always get code && status in node
-    /* istanbul ignore next */
+    /* c8 ignore next */
     try {
       errParsed = JSON.parse(err.responseText);
       //would prefer not to have a try/catch clause
@@ -2905,7 +2905,7 @@ function ajaxCore(options, callback) {
     } catch (e) {
       errObj = generateErrorFromResponse(err);
     }
-    /* istanbul ignore next */
+    /* c8 ignore next */
     cb(errObj);
   }
 
@@ -3221,7 +3221,7 @@ var comparisons = {
     if (collate$1(targetDoc.last_seq, sourceDoc.last_seq) === 0) {
       return sourceDoc.last_seq;
     }
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return 0;
   },
   "1": function (targetDoc, sourceDoc) {
@@ -3255,7 +3255,7 @@ Checkpointer.prototype.getCheckpoint = function () {
       if (version in comparisons) {
         return comparisons[version](targetDoc, sourceDoc);
       }
-      /* istanbul ignore next */
+      /* c8 ignore next */
       return LOWEST_SEQ;
     }, function (err) {
       if (err.status === 404 && targetDoc.last_seq) {
@@ -3269,7 +3269,7 @@ Checkpointer.prototype.getCheckpoint = function () {
             self.readOnlySource = true;
             return targetDoc.last_seq;
           }
-          /* istanbul ignore next */
+          /* c8 ignore next */
           return LOWEST_SEQ;
         });
       }
@@ -3989,7 +3989,7 @@ function replicate(src, target, opts, returnValue, result) {
     });
   }
 
-  /* istanbul ignore next */
+  /* c8 ignore next */
   function onCheckpointError(err) {
     writingCheckpoint = false;
     abortReplication('writeCheckpoint completed with error', err);
@@ -4704,7 +4704,7 @@ function HttpPouch(opts, callback) {
         }
       });
     } else if (supportsBulkGet) {
-      /* istanbul ignore next */
+      /* c8 ignore next */
       doBulkGet(callback);
     } else {
       doBulkGetShim();
@@ -4720,7 +4720,7 @@ function HttpPouch(opts, callback) {
         method: 'GET',
         url: genDBUrl(host, '')
       }, function (err, res) {
-        /* istanbul ignore next */
+        /* c8 ignore next */
         if (err) {
           return callback(err);
         }
@@ -5181,7 +5181,7 @@ function HttpPouch(opts, callback) {
       }
       params.since = since;
       // "since" can be any kind of json object in Coudant/CouchDB 2.x
-      /* istanbul ignore next */
+      /* c8 ignore next */
       if (typeof params.since === "object") {
         params.since = JSON.stringify(params.since);
       }
@@ -5828,7 +5828,7 @@ function httpQuery(db, fun, opts) {
 
 // custom adapters can define their own api._query
 // and override the default behavior
-/* istanbul ignore next */
+/* c8 ignore next */
 function customQuery(db, fun, opts) {
   return new PouchPromise(function (resolve, reject) {
     db._query(fun, opts, function (err, res) {
@@ -5842,7 +5842,7 @@ function customQuery(db, fun, opts) {
 
 // custom adapters can define their own api._viewCleanup
 // and override the default behavior
-/* istanbul ignore next */
+/* c8 ignore next */
 function customViewCleanup(db) {
   return new PouchPromise(function (resolve, reject) {
     db._viewCleanup(function (err, res) {
@@ -6074,7 +6074,7 @@ function updateViewInQueue(view) {
         }
         return processNextBatch();
       }).on('error', onError);
-      /* istanbul ignore next */
+      /* c8 ignore next */
       function onError(err) {
         reject(err);
       }
@@ -6166,7 +6166,7 @@ function queryViewInQueue(view, opts) {
         // implicit migration - in older versions of PouchDB,
         // we explicitly stored the doc as {id: ..., key: ..., value: ...}
         // this is tested in a migration test
-        /* istanbul ignore next */
+        /* c8 ignore next */
         if ('value' in result.doc && typeof result.doc.value === 'object' &&
           result.doc.value !== null) {
           var keys = Object.keys(result.doc.value).sort();
@@ -6349,7 +6349,7 @@ var viewCleanup = callbackify(function () {
   if (db.type() === 'http') {
     return httpViewCleanup(db);
   }
-  /* istanbul ignore next */
+  /* c8 ignore next */
   if (typeof db._viewCleanup === 'function') {
     return customViewCleanup(db);
   }
@@ -6361,7 +6361,7 @@ function queryPromised(db, fun, opts) {
     return httpQuery(db, fun, opts);
   }
 
-  /* istanbul ignore next */
+  /* c8 ignore next */
   if (typeof db._query === 'function') {
     return customQuery(db, fun, opts);
   }
@@ -7019,7 +7019,7 @@ function slowJsonParse(str) {
   try {
     return JSON.parse(str);
   } catch (e) {
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return vuvuzela.parse(str);
   }
 }
@@ -7044,7 +7044,7 @@ function safeJsonStringify(json) {
   try {
     return JSON.stringify(json);
   } catch (e) {
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return vuvuzela.stringify(json);
   }
 }
@@ -7844,7 +7844,7 @@ function checkBlobSupport(txn) {
 
 inherits(Changes$1, events.EventEmitter);
 
-/* istanbul ignore next */
+/* c8 ignore next */
 function attachBrowserEvents(self) {
   if (isChromeApp()) {
     chrome.storage.onChanged.addListener(function (e) {
@@ -7895,7 +7895,7 @@ Changes$1.prototype.addListener = function (dbName, id, db, opts) {
       'doc_ids', 'view', 'since', 'query_params', 'binary'
     ]);
 
-    /* istanbul ignore next */
+    /* c8 ignore next */
     function onError() {
       inprogress = false;
     }
@@ -7928,7 +7928,7 @@ Changes$1.prototype.removeListener = function (dbName, id) {
 };
 
 
-/* istanbul ignore next */
+/* c8 ignore next */
 Changes$1.prototype.notifyLocalWindows = function (dbName) {
   //do a useless change on a storage thing
   //in order to get other windows's listeners to activate

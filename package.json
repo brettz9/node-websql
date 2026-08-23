@@ -52,7 +52,7 @@
   ],
   "scripts": {
     "tsc": "tsc",
-    "tsc:ts7": "npx -y typescript@^7 tsc",
+    "tsc:ts7": "npx -y -p typescript@^7 -c \"tsc\"",
     "lint": "eslint .",
     "attw": "attw --pack . --profile node16",
     "build": "tsc -p tsconfig-prod.json",

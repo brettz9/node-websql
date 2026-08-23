@@ -9,10 +9,13 @@
     "declaration": true,
     "declarationMap": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "target": "es6",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node", "websql"]
   },
-  "include": ["test/**/*.js", "lib/**/*.js", "custom/**/*.js"],
+  // "test/**/*.js",
+  "include": ["lib/**/*.js", "lib/**/*.d.ts", "custom/**/*.js"],
   "exclude": ["node_modules"]
 }

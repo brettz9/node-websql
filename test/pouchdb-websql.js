@@ -603,7 +603,7 @@ function slowJsonParse(str) {
   try {
     return JSON.parse(str);
   } catch (e) {
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return vuvuzela.parse(str);
   }
 }
@@ -628,7 +628,7 @@ function safeJsonStringify(json) {
   try {
     return JSON.stringify(json);
   } catch (e) {
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return vuvuzela.stringify(json);
   }
 }
@@ -640,7 +640,7 @@ function isChromeApp() {
 
 inherits(Changes, events.EventEmitter);
 
-/* istanbul ignore next */
+/* c8 ignore next */
 function attachBrowserEvents(self) {
   if (isChromeApp()) {
     chrome.storage.onChanged.addListener(function (e) {
@@ -691,7 +691,7 @@ Changes.prototype.addListener = function (dbName, id, db, opts) {
       'doc_ids', 'view', 'since', 'query_params', 'binary'
     ]);
 
-    /* istanbul ignore next */
+    /* c8 ignore next */
     function onError() {
       inprogress = false;
     }
@@ -724,7 +724,7 @@ Changes.prototype.removeListener = function (dbName, id) {
 };
 
 
-/* istanbul ignore next */
+/* c8 ignore next */
 Changes.prototype.notifyLocalWindows = function (dbName) {
   //do a useless change on a storage thing
   //in order to get other windows's listeners to activate
@@ -740,7 +740,7 @@ Changes.prototype.notify = function (dbName) {
   this.notifyLocalWindows(dbName);
 };
 
-/* istanbul ignore next */
+/* c8 ignore next */
 var PouchPromise = typeof Promise === 'function' ? Promise : lie;
 
 function once(fun) {
