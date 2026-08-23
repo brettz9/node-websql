@@ -51,6 +51,7 @@
     "database"
   ],
   "scripts": {
+    "prepublishOnly": "npm run build && npm run attw",
     "tsc": "tsc",
     "tsc:ts7": "npx -y -p typescript@^7 -c \"tsc\"",
     "lint": "eslint .",
