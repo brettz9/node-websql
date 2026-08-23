@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2023"],
+    "lib": ["esnext"],
     "moduleResolution": "nodenext",
     "module": "NodeNext",
     "allowJs": true,

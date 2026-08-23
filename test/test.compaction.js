@@ -9,7 +9,7 @@ const autoCompactionAdapters = ['local'];
 adapters.forEach(function (adapter) {
   describe('test.compaction.js-' + adapter, function () {
     if (testUtils.isCouchMaster()) {
-      return true;
+      return;
     }
 
     const dbs = {};
@@ -294,7 +294,7 @@ adapters.forEach(function (adapter) {
               });
             })
           ).then(function (docsAndRevs) {
-            combinedResult = combinedResult.concat(docsAndRevs);
+            combinedResult = [...combinedResult, ...docsAndRevs];
           });
         })).then(function () {
           return combinedResult;
@@ -455,7 +455,7 @@ adapters.forEach(function (adapter) {
       for (let i = 0; i < 50; i++) {
         queue = queue.then(function () {
           return db.get('doc').then(function (doc) {
-            doc._attachments = doc._attachments || {};
+            doc._attachments ||= {};
             const blob = testUtils.makeBlob(
               PouchDB.utils.btoa(Math.random().toString()),
               'text/plain'
@@ -490,7 +490,7 @@ adapters.forEach(function (adapter) {
       for (let i = 0; i < 50; i++) {
         queue = queue.then(function () {
           return db.get('doc').then(function (doc) {
-            doc._attachments = doc._attachments || {};
+            doc._attachments ||= {};
             const blob = testUtils.makeBlob(
               PouchDB.utils.btoa(Math.random().toString()),
               'text/plain'
@@ -499,6 +499,9 @@ adapters.forEach(function (adapter) {
               'text/plain');
           });
         });
+        // Intentional: chains `compactQueue` across iterations, reading/
+        // writing its current value at call time each round.
+        // eslint-disable-next-line no-loop-func -- see above
         queue.then(function () {
           compactQueue = compactQueue.then(function () {
             return PouchDB.utils.Promise.all([
@@ -689,7 +692,7 @@ adapters.forEach(function (adapter) {
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
-        digest = doc._attachments['deleteme.txt'].digest;
+        ({digest} = doc._attachments['deleteme.txt']);
         delete doc._attachments['deleteme.txt'];
         doc._attachments['retainme.txt'] = {
           data: 'dG90bw==', // 'toto'
@@ -777,9 +780,7 @@ adapters.forEach(function (adapter) {
         digestsToForget.push(docs[0]._attachments['att.txt'].digest, docs[1]._attachments['att.txt'].digest);
         digestsToRemember.push(docs[2]._attachments['att.txt'].digest, docs[3]._attachments['att.txt'].digest);
 
-        allDigests = allDigests.concat(digestsToForget).concat(
-          digestsToRemember
-        );
+        allDigests = [...allDigests, ...digestsToForget, ...digestsToRemember];
 
         return PouchDB.utils.Promise.all(allDigests.map(function (digest) {
           const doc = {
@@ -849,7 +850,7 @@ adapters.forEach(function (adapter) {
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
-        digest = doc._attachments['deleteme.txt'].digest;
+        ({digest} = doc._attachments['deleteme.txt']);
         delete doc._attachments['deleteme.txt'];
         doc._attachments['retainme.txt'] = {
           data: 'dG90bw==', // 'toto'
@@ -935,7 +936,7 @@ adapters.forEach(function (adapter) {
         return db.get('foo', {attachments: true});
       }).then(function (doc) {
         doc._rev.should.equal('1-x');
-        digest = doc._attachments['att.txt'].digest;
+        ({digest} = doc._attachments['att.txt']);
       }).then(function () {
         const doc = {
           _attachments: {
@@ -1852,7 +1853,7 @@ adapters.forEach(function (adapter) {
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
-        digest = doc._attachments['deleteme.txt'].digest;
+        ({digest} = doc._attachments['deleteme.txt']);
         delete doc._attachments['deleteme.txt'];
         doc._attachments['retainme.txt'] = {
           data: 'dG90bw==', // 'toto'
@@ -1911,7 +1912,7 @@ adapters.forEach(function (adapter) {
       });
     });
 
-    it('#2818 successive new_edits okay with attachments', function () {
+    it('#2818 successive new_edits okay with attachments (auto-compaction section)', function () {
       const db = new PouchDB(dbs.name);
       const docs = [{
         _id: 'foo',
@@ -1934,7 +1935,7 @@ adapters.forEach(function (adapter) {
         return db.get('foo', {attachments: true});
       }).then(function (doc) {
         doc._rev.should.equal('1-x');
-        digest = doc._attachments['att.txt'].digest;
+        ({digest} = doc._attachments['att.txt']);
       }).then(function () {
         const doc = {
           _attachments: {

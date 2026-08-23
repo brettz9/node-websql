@@ -27,6 +27,7 @@ adapters.forEach(function (adapter) {
       if (result.length === 1) {
         return result[0];
       }
+      return undefined;
     }
 
     beforeEach(function (done) {
@@ -70,7 +71,7 @@ adapters.forEach(function (adapter) {
       const db = new PouchDB(dbs.name);
       db.bulkDocs({docs}, function () {
         let changeCount = 0;
-        var promise = db.changes().on('change', function handler () {
+        const promise = db.changes().on('change', function handler () {
           changeCount++;
           if (changeCount === 5) {
             promise.cancel();
@@ -223,7 +224,7 @@ adapters.forEach(function (adapter) {
                 since: update_seq,
                 include_docs: true
               }).on('complete', function (results) {
-                results = results.results;
+                ({results} = results);
                 results.length.should.equal(2);
 
                 // order is not guaranteed
@@ -477,7 +478,7 @@ adapters.forEach(function (adapter) {
         _id: '_design/test',
         filters: {
           test: function () {
-            throw new Error(); // syntaxerrors can't be caught either.
+            throw new Error('intentional test error'); // syntaxerrors can't be caught either.
           }.toString()
         }
       }).then(function () {
@@ -574,7 +575,8 @@ adapters.forEach(function (adapter) {
       // not equal the last seq in the _changes feed (although it
       // should evaluate to the same thing on the server).
       if (testUtils.isCouchMaster()) {
-        return done();
+        done();
+        return;
       }
 
       const docs = [
@@ -708,7 +710,8 @@ adapters.forEach(function (adapter) {
       // not equal the last seq in the _changes feed (although it
       // should evaluate to the same thing on the server).
       if (testUtils.isCouchMaster()) {
-        return done();
+        done();
+        return;
       }
 
       const docs = [
@@ -838,7 +841,8 @@ adapters.forEach(function (adapter) {
       // _changes in CouchDB 2.0 does not guarantee order
       // so skip this test
       if (testUtils.isCouchMaster()) {
-        return done();
+        done();
+        return;
       }
       const db = new PouchDB(dbs.name);
       db.post({_id: '0', test: 'ing'}, function () {
@@ -889,7 +893,8 @@ adapters.forEach(function (adapter) {
       let changes = 0;
       db.bulkDocs({docs}, function (err) {
         if (err) {
-          return done(err);
+          done(err);
+          return;
         }
         db.changes({
           descending: true
@@ -907,7 +912,7 @@ adapters.forEach(function (adapter) {
     it('live-changes', function (done) {
       const db = new PouchDB(dbs.name);
       let count = 0;
-      var changes = db.changes({
+      const changes = db.changes({
         live: true
       }).on('complete', function () {
         count.should.equal(1);
@@ -937,7 +942,7 @@ adapters.forEach(function (adapter) {
         count.should.equal(2);
         done();
       }
-      var changes1 = db.changes({
+      let changes1 = db.changes({
         live: true
       }).on('complete', function () {
         changes1Complete = true;
@@ -947,7 +952,7 @@ adapters.forEach(function (adapter) {
         changes1.cancel();
         changes1 = null;
       }).on('error', done);
-      var changes2 = db.changes({
+      let changes2 = db.changes({
         live: true
       }).on('complete', function () {
         changes2Complete = true;
@@ -962,7 +967,7 @@ adapters.forEach(function (adapter) {
 
     it('Continuous changes doc', function (done) {
       const db = new PouchDB(dbs.name);
-      var changes = db.changes({
+      const changes = db.changes({
         live: true,
         include_docs: true
       }).on('complete', function (result) {
@@ -999,7 +1004,7 @@ adapters.forEach(function (adapter) {
         }, 200);
       }
 
-      var changes = db.changes({
+      const changes = db.changes({
         live: true
       }).on('complete', function (result) {
         result.status.should.equal('cancelled');
@@ -1012,7 +1017,8 @@ adapters.forEach(function (adapter) {
           changes.cancel();
           db.post({test: 'another doc'}, function (err) {
             if (err) {
-              return done(err);
+              done(err);
+              return;
             }
             docPosted = true;
           });
@@ -1024,22 +1030,22 @@ adapters.forEach(function (adapter) {
 
     it('#3579 changes firing 1 too many times', function () {
       const db = new PouchDB(dbs.name);
-      const {Promise} = PouchDB.utils;
+      const {Promise: PouchPromise} = PouchDB.utils;
       return db.bulkDocs([{}, {}, {}]).then(function () {
         const changes = db.changes({
           since: 'now',
           live: true,
           include_docs: true
         });
-        return Promise.all([
-          new Promise(function (resolve, reject) {
+        return PouchPromise.all([
+          new PouchPromise(function (resolve, reject) {
             changes.on('error', reject);
             changes.on('change', function (change) {
               changes.cancel();
               resolve(change);
             });
           }),
-          new Promise(function (resolve) {
+          new PouchPromise(function (resolve) {
             setTimeout(resolve, 50);
           }).then(function () {
             return db.put({_id: 'foobar'});
@@ -1845,7 +1851,7 @@ adapters.forEach(function (adapter) {
       const db = new PouchDB(dbs.name);
       let count = 0;
       db.bulkDocs({docs: docs1}, function () {
-        var changes = db.changes({
+        const changes = db.changes({
           filter (doc) {
             return doc.integer % 2 === 0;
           },
@@ -1880,11 +1886,12 @@ adapters.forEach(function (adapter) {
       const db = new PouchDB(dbs.name);
       let count = 0;
       db.bulkDocs({docs: docs1}, function () {
-        var changes = db.changes({
+        const changes = db.changes({
           filter (doc, req) {
             if (req.query.abc) {
               return doc.integer % 2 === 0;
             }
+            return undefined;
           },
           query_params: params,
           live: true
@@ -2009,7 +2016,7 @@ adapters.forEach(function (adapter) {
       return db.bulkDocs(docs).then(function () {
         return new PouchDB.utils.Promise(function (resolve, reject) {
           const retChanges = [];
-          var changes = db.changes({
+          const changes = db.changes({
             doc_ids: ['1', '3'],
             live: true
           }).on('change', function (change) {
@@ -2043,7 +2050,7 @@ adapters.forEach(function (adapter) {
       return db.bulkDocs(docs).then(function () {
         return new PouchDB.utils.Promise(function (resolve, reject) {
           const retChanges = [];
-          var changes = db.changes({
+          const changes = db.changes({
             doc_ids: [docs[1]._id, docs[3]._id],
             live: true
           }).on('change', function (change) {
@@ -2358,7 +2365,7 @@ adapters.forEach(function (adapter) {
     it('changes are not duplicated', function (done) {
       const db = new PouchDB(dbs.name);
       let called = 0;
-      var changes = db.changes({
+      const changes = db.changes({
         live: true
       }).on('change', function () {
         called++;
@@ -2384,7 +2391,8 @@ adapters.forEach(function (adapter) {
       let changes = 0;
       db.bulkDocs({docs}, function (err) {
         if (err) {
-          return done(err);
+          done(err);
+          return;
         }
         db.changes({
           descending: true,
@@ -2412,7 +2420,8 @@ adapters.forEach(function (adapter) {
       let changes = 0;
       db.bulkDocs({docs}, function (err) {
         if (err) {
-          return done(err);
+          done(err);
+          return;
         }
         db.changes({
           descending: true,
@@ -2523,7 +2532,7 @@ adapters.forEach(function (adapter) {
       const db = new PouchDB(dbs.name);
       let count = 0;
       db.bulkDocs({docs: docs1}, function () {
-        var changes = db.changes({
+        const changes = db.changes({
           live: true
         }).on('complete', function (result) {
           result.status.should.equal('cancelled');

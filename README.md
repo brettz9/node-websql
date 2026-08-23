@@ -1,5 +1,4 @@
-websql-configurable
-====
+# websql-configurable
 
 A fork of [websql](https://github.com/nolanlawson/node-websql) which
 allows for additional configurability (with types incorporated from [@types/websql](https://www.npmjs.com/package/@types/websql)).
@@ -7,16 +6,14 @@ allows for additional configurability (with types incorporated from [@types/webs
 The [WebSQL Database API][websql], implemented for Node
 using [sqlite3](https://github.com/mapbox/node-sqlite3). In the browser, it falls back to `window.openDatabase`.
 
-Install
-----
+## Install
 
     npm install websql-configurable
 
-Usage
-----
+## Usage
 
 ```js
-const openDatabase = require('websql-configurable');
+import openDatabase from 'websql-configurable';
 ```
 
 Create a SQLite3 database called `mydb.db`:
@@ -31,8 +28,7 @@ Create an in-memory database:
 const db = openDatabase(':memory:', '1.0', 'description', 1);
 ```
 
-API
----
+## API
 
 ### openDatabase(name, version, description, size [, callback])
 
@@ -63,8 +59,7 @@ Both `readTransaction()` (read-only) and `transaction()` (read-write) are suppor
 `readTransaction()` has some small performance optimizations, so it's worthwhile to
 use if you're not writing any data in a transaction.
 
-Goals
-----
+## Goals
 
 The [WebSQL Database API][websql] is a deprecated
 standard, but in many cases it's useful to reuse legacy code
@@ -79,8 +74,7 @@ denominator version is exported by this library.
 This library has a robust test suite, and has been known to pass the PouchDB
 test suite as well.
 
-Non-Goals
----
+## Non-Goals
 
 This library is _not_ designed to:
 
@@ -90,8 +84,7 @@ This library is _not_ designed to:
 In other words, the goal is not to carry the torch of WebSQL,
 but rather to bridge the gap from existing WebSQL-based code to Node.js.
 
-Custom SQLite3 bindings
-----
+## Custom SQLite3 bindings
 
 This library is designed to allow swappable SQLite3 implementations, beyond
 just [node-sqlite3](https://github.com/mapbox/node-sqlite3). Examples:
@@ -103,7 +96,7 @@ just [node-sqlite3](https://github.com/mapbox/node-sqlite3). Examples:
 To create your own custom implementation, use this API:
 
 ```js
-const customOpenDatabase = require('websql/custom');
+import customOpenDatabase from 'websql/custom/index.js';
 
 // The second argument is an optional options object
 const openDatabase = customOpenDatabase(SQLiteDatabase, {
@@ -133,9 +126,9 @@ Then it implements a single function, `exec()`, like so:
 ```js
 /**
  *
- * @param queries
- * @param readOnly
- * @param callback
+ * @param {Array<{sql: string, args: Array}>} queries
+ * @param {boolean} readOnly
+ * @param {(err: Error, results?: Array) => void} callback
  */
 function exec (queries, readOnly, callback) {
   // queries: an array of SQL statements and queries, with a key "sql" and "args"
@@ -173,10 +166,10 @@ The arguments to bind the query.
 E.g.:
 
 ```js
-{
+const args = {
   sql: 'INSERT INTO foo values (?, ?)',
   args: ['bar', 'baz']
-}
+};
 ```
 
 ### SQLResult
@@ -205,36 +198,34 @@ Each object is a mapping of keys (columns) to values (value fetched).
 E.g.:
 
 ```js
-{
+const rows = {
   insertId: undefined,
   rowsAffected: 0,
   rows: [
-    {'foo': 'bar'},
-    {'foo': 'baz'},
+    {foo: 'bar'},
+    {foo: 'baz'}
   ]
-}
+};
 ```
 
 Or:
 
 ```js
-{
-  new Error('whoopsie');
-}
+const errorResult = {
+  error: new Error('whoopsie')
+};
 ```
 
 For an example implementation (and the one used by this module)
 see `lib/sqlite/SQLiteDatabase.js`.
 
-TODOs
----
+## TODOs
 
 The versioning and migration APIs
 (i.e. [`changeVersion()`](https://www.w3.org/TR/webdatabase/#dom-database-changeversion))
 are not supported. Pull requests welcome!
 
-Limitations
-----
+## Limitations
 
 1. With the restrictions of the [node-sqlite3 API](https://github.com/mapbox/node-sqlite3/wiki/API)
 on database names ("Valid values are filenames, ":memory:" for an anonymous
@@ -257,8 +248,7 @@ which are surfaced for our users: namely, that statements will only be
 executed up to the first NULL byte and [SQL comments](https://sqlite.org/lang_comment.html)
 will lead to runtime errors.
 
-Testing
-----
+## Testing
 
 First:
 

@@ -1,3 +1,4 @@
+/* global document, FileReader -- only reached in the browser (process.browser) branches below */
 import PouchDB from './pouchdb.js';
 
 const testUtils = {};
@@ -74,9 +75,11 @@ testUtils.couchHost = function () {
  *
  * @param parts
  * @param properties
+ * @throws {Error} Any construction error other than the native
+ * `Blob` constructor being unavailable.
  */
 function createBlob (parts, properties) {
-  /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder */
+  /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder -- old browser Blob constructor fallbacks */
   parts ||= [];
   properties ||= {};
   try {
@@ -132,7 +135,7 @@ testUtils.readBlob = function (blob, callback) {
       const length = bytes.byteLength;
 
       for (let i = 0; i < length; i++) {
-        binary += String.fromCharCode(bytes[i]);
+        binary += String.fromCodePoint(bytes[i]);
       }
 
       callback(binary);
@@ -191,7 +194,7 @@ testUtils.putAfter = function (db, doc, prevRev, callback) {
     return;
   }
   newDoc._revisions = {
-    start: +newDoc._rev.split('-', 1)[0],
+    start: Number(newDoc._rev.split('-', 1)[0]),
     ids: [
       newDoc._rev.split('-', 2)[1],
       prevRev.split('-', 2)[1]
@@ -260,7 +263,8 @@ testUtils.writeDocs = function (db, docs, callback, res) {
     res = [];
   }
   if (!docs.length) {
-    return callback(null, res);
+    callback(null, res);
+    return;
   }
   const doc = docs.shift();
   db.put(doc, function (err, info) {
@@ -271,12 +275,14 @@ testUtils.writeDocs = function (db, docs, callback, res) {
 
 // Borrowed from: https://stackoverflow.com/a/840849
 testUtils.eliminateDuplicates = function (arr) {
-  let i, element, len = arr.length, out = [], obj = {};
-  for (i = 0; i < len; i++) {
+  const len = arr.length;
+  const out = [];
+  const obj = {};
+  for (let i = 0; i < len; i++) {
     obj[arr[i]] = 0;
   }
-  for (element in obj) {
-    if (obj.hasOwnProperty(element)) {
+  for (const element in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, element)) {
       out.push(element);
     }
   }
@@ -305,8 +311,7 @@ testUtils.fin = function (promise, cb) {
 };
 
 testUtils.promisify = function (fun, context) {
-  return function () {
-    const args = [...arguments];
+  return function (...args) {
     return new PouchDB.utils.Promise(function (resolve, reject) {
       args.push(function (err, res) {
         if (err) {

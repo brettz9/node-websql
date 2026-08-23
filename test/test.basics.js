@@ -28,6 +28,7 @@ adapters.forEach(function (adapter) {
     });
 
     it('Create a pouch without new keyword', function () {
+      // eslint-disable-next-line sonarjs/inconsistent-function-call, new-cap -- Testing no new
       const db = PouchDB(dbs.name);
       db.should.be.an.instanceof(PouchDB);
     });
@@ -85,6 +86,7 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         throw new Error('.get should return an error');
       }, function (err) {
+        // eslint-disable-next-line no-restricted-syntax -- the clearest way to check this
         should.equal(err instanceof Error, true, 'should be an error');
       });
     });
@@ -101,13 +103,13 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('[4595] should reject xhr errors', function (done) {
-      const invalidUrl = 'http:///';
+      const invalidUrl = 'https:///';
       new PouchDB(dbs.name).replicate.to(invalidUrl, {}).catch(function () {
         done();
       });
     });
     it.skip('[4595] should emit error event on xhr error', function (done) {
-      const invalidUrl = 'http:///';
+      const invalidUrl = 'https:///';
       new PouchDB(dbs.name).replicate.to(invalidUrl, {}).
         on('error', function () {
           done();
@@ -125,7 +127,7 @@ adapters.forEach(function (adapter) {
     it('Get invalid id', function () {
       const db = new PouchDB(dbs.name);
       return db.get(1234).then(function () {
-        throw 'show not be here';
+        throw new Error('show not be here');
       }).catch(function (err) {
         should.exist(err);
       });
@@ -311,7 +313,7 @@ adapters.forEach(function (adapter) {
       const db = new PouchDB(dbs.name);
       let id;
       db.post({test: 'someotherstuff'}).then(function (info) {
-        id = info.id;
+        ({id} = info);
         return db.remove(info.id, info.rev);
       }).then(function () {
         return db.get(id);
@@ -361,7 +363,7 @@ adapters.forEach(function (adapter) {
 
     it('Remove doc, no callback', function (done) {
       const db = new PouchDB(dbs.name);
-      var changes = db.changes({
+      const changes = db.changes({
         live: true,
         include_docs: true
       }).on('change', function (change) {
@@ -582,7 +584,6 @@ adapters.forEach(function (adapter) {
       const TO_SEND = 5;
       let sent = 0;
       let complete = 0;
-      let timer;
 
       const db = new PouchDB(dbs.name);
 
@@ -600,7 +601,7 @@ adapters.forEach(function (adapter) {
         db.bulkDocs({docs}, bulkCallback);
       };
 
-      timer = setInterval(save, 10);
+      const timer = setInterval(save, 10);
     });
 
     it('Testing valid id', function (done) {
@@ -789,7 +790,7 @@ adapters.forEach(function (adapter) {
       });
     });
 
-    it('Fail to fetch a doc after db was deleted', function (done) {
+    it('Fail to fetch a doc after db was deleted (with then)', function (done) {
       new PouchDB(dbs.name, function (err, db) {
         let db2 = new PouchDB(dbs.name);
         const doc = {_id: 'foodoc'};
@@ -911,18 +912,18 @@ adapters.forEach(function (adapter) {
       // but the http adapter smooths this out
       return new PouchDB(dbs.name).then(function (db) {
         return db.put({_id: '_local/foo'}).then(function (info) {
-          true.should.equal(info.ok, 'putting local returns ok=true');
+          info.ok.should.equal(true, 'putting local returns ok=true');
           return db.put({_id: 'quux'});
         }).then(function (info) {
-          true.should.equal(info.ok, 'putting returns ok=true');
+          info.ok.should.equal(true, 'putting returns ok=true');
           return db.bulkDocs([{_id: '_local/bar'}, {_id: 'baz'}]);
         }).then(function (info) {
           info.should.have.length(2, 'correct num bulk docs');
-          true.should.equal(info[0].ok, 'bulk docs says ok=true #1');
-          true.should.equal(info[1].ok, 'bulk docs says ok=true #2');
+          info[0].ok.should.equal(true, 'bulk docs says ok=true #1');
+          info[1].ok.should.equal(true, 'bulk docs says ok=true #2');
           return db.post({});
         }).then(function (info) {
-          true.should.equal(info.ok, 'posting returns ok=true');
+          info.ok.should.equal(true, 'posting returns ok=true');
         });
       });
     });
@@ -932,11 +933,11 @@ adapters.forEach(function (adapter) {
       const plugin = {
         initPull () {
           this.oldPut = this.put;
-          this.put = function () {
-            if (typeof arguments[arguments.length - 1] === 'function') {
+          this.put = function (...args) {
+            if (typeof args.at(-1) === 'function') {
               called++;
             }
-            return Reflect.apply(this.oldPut, this, arguments);
+            return Reflect.apply(this.oldPut, this, args);
           };
         },
         cleanupPut () {
@@ -960,7 +961,7 @@ adapters.forEach(function (adapter) {
       let rev;
 
       db.put({_id: 'foo'}).then(function (resp) {
-        rev = resp.rev;
+        ({rev} = resp);
         return db.remove('foo', rev);
       }).then(function () {
         return db.get('foo');
@@ -996,7 +997,7 @@ adapters.forEach(function (adapter) {
       }
 
       return db.put({_id: 'foo'}).then(function (resp) {
-        rev = resp.rev;
+        ({rev} = resp);
         return checkNumRevisions(1);
       }).then(function () {
         return db.remove('foo', rev);
@@ -1005,7 +1006,7 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.allDocs({keys: ['foo']});
       }).then(function (res) {
-        rev = res.rows[0].value.rev;
+        ({rev} = res.rows[0].value);
         return db.put({_id: 'foo', _rev: rev});
       }).then(function () {
         return checkNumRevisions(3);
@@ -1029,7 +1030,7 @@ adapters.forEach(function (adapter) {
         });
       }
       return db.put({_id: 'foo'}).then(function (resp) {
-        rev = resp.rev;
+        ({rev} = resp);
         return checkNumRevisions(1);
       }).then(function () {
         return db.remove('foo', rev);
@@ -1038,7 +1039,7 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.put({_id: 'foo'});
       }).then(function (res) {
-        rev = res.rev;
+        ({rev} = res);
         return checkNumRevisions(3);
       }).then(function () {
         return db.remove('foo', rev);
@@ -1125,7 +1126,7 @@ adapters.forEach(function (adapter) {
       // CouchDB 1.X has a bug which allows this insertion via bulk_docs
       // (which PouchDB uses for all document insertions)
       if (adapter === 'http' && !testUtils.isCouchMaster()) {
-        return;
+        return undefined;
       }
 
       const db = new PouchDB(dbs.name);
@@ -1180,8 +1181,6 @@ adapters.forEach(function (adapter) {
             if (typeof db1._blobSupport !== 'undefined') {
               db1._blobSupport.should.equal(db2._blobSupport,
                 'same blob support');
-            } else {
-              true.should.equal(true);
             }
           });
         });

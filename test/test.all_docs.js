@@ -27,7 +27,7 @@ adapters.forEach(function (adapter) {
 
     it('Testing all docs', function (done) {
       const db = new PouchDB(dbs.name);
-      testUtils.writeDocs(db, JSON.parse(JSON.stringify(origDocs)),
+      testUtils.writeDocs(db, structuredClone(origDocs),
         function () {
           db.allDocs(function (err, result) {
             should.not.exist(err);
@@ -152,7 +152,7 @@ adapters.forEach(function (adapter) {
     it('Testing allDocs invalid opts.keys', function () {
       const db = new PouchDB(dbs.name);
       return db.allDocs({keys: 1234}).then(function () {
-        throw 'should not be here';
+        throw new Error('should not be here');
       }).catch(function (err) {
         should.exist(err);
       });
@@ -164,7 +164,7 @@ adapters.forEach(function (adapter) {
       db.info(function (err, info) {
         const {update_seq} = info;
 
-        testUtils.writeDocs(db, JSON.parse(JSON.stringify(origDocs)),
+        testUtils.writeDocs(db, structuredClone(origDocs),
           function () {
             db.get('1', function (err, doc) {
               db.remove(doc, function (err, deleted) {
@@ -177,6 +177,7 @@ adapters.forEach(function (adapter) {
                     if (c.deleted) {
                       return c.id;
                     }
+                    return undefined;
                   });
                   deleted_ids.should.include('1');
 
@@ -194,7 +195,7 @@ adapters.forEach(function (adapter) {
       db.info(function (err, info) {
         const {update_seq} = info;
 
-        testUtils.writeDocs(db, JSON.parse(JSON.stringify(origDocs)),
+        testUtils.writeDocs(db, structuredClone(origDocs),
           function () {
             db.get('3', function (err, doc) {
               doc.updated = 'totally';
@@ -217,7 +218,7 @@ adapters.forEach(function (adapter) {
 
     it('Testing include docs', function (done) {
       const db = new PouchDB(dbs.name);
-      testUtils.writeDocs(db, JSON.parse(JSON.stringify(origDocs)),
+      testUtils.writeDocs(db, structuredClone(origDocs),
         function () {
           db.changes({
             include_docs: true
@@ -234,7 +235,7 @@ adapters.forEach(function (adapter) {
 
     it('Testing conflicts', function (done) {
       const db = new PouchDB(dbs.name);
-      testUtils.writeDocs(db, JSON.parse(JSON.stringify(origDocs)),
+      testUtils.writeDocs(db, structuredClone(origDocs),
         function () {
         // add conflicts
           const conflictDoc1 = {
@@ -642,7 +643,7 @@ adapters.forEach(function (adapter) {
         }
         return db.allDocs(opts).then(function (res) {
           if (!res.rows.length) {
-            return;
+            return undefined;
           }
           if (lastkey) {
             res.rows[0].key.should.be.above(lastkey);
@@ -702,7 +703,7 @@ adapters.forEach(function (adapter) {
         const id = 'baz\u{0}';
         let rev;
         db.put({_id: id}).then(function (res) {
-          rev = res.rev;
+          ({rev} = res);
         }).then(function () {
           return db.get(id);
         }).then(function (doc) {

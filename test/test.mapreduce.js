@@ -1,4 +1,4 @@
-/* global sum */
+/* global emit, sum -- injected into map/reduce functions by scope-eval at runtime */
 import PouchDB from './pouchdb.js';
 import chai from 'chai';
 import testUtils from './test.utils.js';
@@ -25,10 +25,9 @@ adapters.forEach(function (adapter) {
  */
 function tests (suiteName, dbName, dbType, viewType) {
   describe(suiteName, function () {
-    let Promise;
+    let LocalPromise;
 
-    let createView;
-    createView = viewType === 'persisted'
+    const createView = viewType === 'persisted'
       ? function (db, viewObj) {
         const storableViewObj = {
           map: viewObj.map.toString()
@@ -36,7 +35,7 @@ function tests (suiteName, dbName, dbType, viewType) {
         if (viewObj.reduce) {
           storableViewObj.reduce = viewObj.reduce.toString();
         }
-        return new Promise(function (resolve, reject) {
+        return new LocalPromise(function (resolve, reject) {
           db.put({
             _id: '_design/theViewDoc',
             views: {
@@ -52,7 +51,7 @@ function tests (suiteName, dbName, dbType, viewType) {
         });
       }
       : function (db, viewObj) {
-        return new Promise(function (resolve) {
+        return new LocalPromise(function (resolve) {
           setTimeout(function () {
             resolve(viewObj);
           }, 0);
@@ -60,7 +59,7 @@ function tests (suiteName, dbName, dbType, viewType) {
       };
 
     beforeEach(function () {
-      Promise = PouchDB.utils.Promise;
+      LocalPromise = PouchDB.utils.Promise;
       return new PouchDB(dbName).destroy();
     });
     afterEach(function () {
@@ -164,7 +163,7 @@ function tests (suiteName, dbName, dbType, viewType) {
       it('Test simultaneous temp views', function () {
         return new PouchDB(dbName).then(function (db) {
           return db.put({_id: '0', foo: 1, bar: 2, baz: 3}).then(function () {
-            return Promise.all(['foo', 'bar', 'baz'].map(function (key, i) {
+            return LocalPromise.all(['foo', 'bar', 'baz'].map(function (key, i) {
               const fun = 'function(doc){emit(doc.' + key + ');}';
               return db.query({map: fun}).then(function (res) {
                 res.rows.should.deep.equal([{
@@ -381,7 +380,7 @@ function tests (suiteName, dbName, dbType, viewType) {
 
       // then object, compares each key value in the list until different.
       // larger objects sort after their subset objects.
-       // Member order does matter for collation.
+      // Member order does matter for collation.
       // CouchDB preserves member order
       // but doesn't require that clients will.
       // (this test might fail if used with a js engine
@@ -1209,7 +1208,7 @@ function tests (suiteName, dbName, dbType, viewType) {
               {_id: 'constructor', _rev: rev}
             ]);
           }).then(function (res) {
-            rev = res[0].rev;
+            ({rev} = res[0]);
             return db.query(queryFun, {include_docs: true});
           }).then(function (res) {
             res.rows.should.deep.equal([
@@ -1227,7 +1226,7 @@ function tests (suiteName, dbName, dbType, viewType) {
               {_id: 'constructor', _rev: rev, _deleted: true}
             ]);
           }).then(function (res) {
-            rev = res[0].rev;
+            ({rev} = res[0]);
             return db.query(queryFun, {include_docs: true});
           }).then(function (res) {
             res.rows.should.deep.equal([]);
@@ -1365,7 +1364,7 @@ function tests (suiteName, dbName, dbType, viewType) {
           for (let i = 0; i < numAttempts; i++) {
             attempts.push(sequence('test' + i));
           }
-          return Promise.all(attempts).then(function () {
+          return LocalPromise.all(attempts).then(function () {
             const keys = [];
             for (let i = 0; i < numAttempts; i++) {
               keys.push('_design/test' + i);
@@ -1467,7 +1466,7 @@ function tests (suiteName, dbName, dbType, viewType) {
 
             // keys that should all resolve to null
             const emptyKeys = [null, NaN, Infinity, -Infinity];
-            return Promise.all(emptyKeys.map(function (emptyKey) {
+            return LocalPromise.all(emptyKeys.map(function (emptyKey) {
               return db.query(mapFunction, {key: emptyKey}).then(function (data) {
                 data.rows.map(function (row) {
                   return row.id;
@@ -2310,6 +2309,7 @@ function tests (suiteName, dbName, dbType, viewType) {
       return new PouchDB(dbName).then(function (db) {
         return createView(db, {
           map: function () {
+            // intentionally empty: testing a map function with no emits
           }
         }).then(function (queryFun) {
           return db.bulkDocs({docs: [
@@ -2832,6 +2832,7 @@ function tests (suiteName, dbName, dbType, viewType) {
             emit(doc.name);
           },
           reduce: function () {
+            // intentionally empty: testing a reduce function with no return
           }
         }).then(function (queryFun) {
           return db.put({name: 'bar', _id: '1'}).then(function () {
@@ -3028,7 +3029,7 @@ function tests (suiteName, dbName, dbType, viewType) {
       });
     });
 
-    it.skip('should handle many doc changes', function () {
+    it.skip('should handle many doc changes (staggered seqs)', function () {
       let docs = [{_id: '0'}, {_id: '1'}, {_id: '2'}];
 
       const keySets = [
@@ -3162,6 +3163,7 @@ function tests (suiteName, dbName, dbType, viewType) {
               if (task) {
                 return task().then(getNext);
               }
+              return undefined;
             }
             return getNext();
           });
@@ -3215,8 +3217,7 @@ function tests (suiteName, dbName, dbType, viewType) {
         }).then(function () {
           return db.query('test/unexisting');
         }).then(function () {
-          // shouldn't happen
-          true.should.equal(false);
+          should.fail('querying an unexisting view should not resolve');
         }).catch(function (err) {
           err.status.should.equal(404);
         });

@@ -10,6 +10,13 @@ bluebird.longStackTraces();
 chai.use(chaiAsPromised);
 const rimraf = denodeify(rimrafOriginal);
 
+// This can't use a top-level `await import(...)` below instead of the
+// `async function` here: Mocha loads the entry test file via a synchronous
+// `require()`, which throws `ERR_REQUIRE_ASYNC_MODULE` for any ES module
+// that has top-level await. Wrapping the imports in this `describe()`
+// callback avoids that, at the cost of Mocha not awaiting this callback --
+// if one of the `await import(...)` calls below throws, every test after
+// it silently never registers (the run reports "0 passing" with no error).
 describe('node-websql test suite', async function () {
   this.timeout(300000);
 
@@ -21,6 +28,7 @@ describe('node-websql test suite', async function () {
         return mkdirp('testdbs');
       });
     }
+    return undefined;
   });
 
   after(function () {
@@ -29,6 +37,7 @@ describe('node-websql test suite', async function () {
         return rimraf('testdbs');
       });
     }
+    return undefined;
   });
 
   await import('./test.main.js');

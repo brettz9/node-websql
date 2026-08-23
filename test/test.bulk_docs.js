@@ -19,7 +19,7 @@ function makeDocs (start, end, templateDoc) {
   }
   const docs = [];
   for (let i = start; i < end; i++) {
-    const newDoc = eval('(' + templateDocSrc + ')');
+    const newDoc = JSON.parse(templateDocSrc);
     newDoc._id = i.toString();
     newDoc.integer = i;
     newDoc.string = i.toString();
@@ -54,16 +54,16 @@ adapters.forEach(function (adapter) {
       const docs = makeDocs(5);
       db.bulkDocs({docs}, function (err, results) {
         results.should.have.length(5, 'results length matches');
-        for (var i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) {
           results[i].id.should.equal(docs[i]._id, 'id matches');
           should.exist(results[i].rev, 'rev is set');
           // Update the doc
           docs[i]._rev = results[i].rev;
-          docs[i].string = docs[i].string + '.00';
+          docs[i].string += '.00';
         }
         db.bulkDocs({docs}, function (err, results) {
           results.should.have.length(5, 'results length matches');
-          for (i = 0; i < 5; i++) {
+          for (let i = 0; i < 5; i++) {
             results[i].id.should.equal(i.toString(), 'id matches again');
             // set the delete flag to delete the docs in the next step
             docs[i]._rev = results[i].rev;
@@ -75,7 +75,7 @@ adapters.forEach(function (adapter) {
                 'conflict', 'First doc should be in conflict'
               );
               should.not.exist(results[0].rev, 'no rev in conflict');
-              for (i = 1; i < 5; i++) {
+              for (let i = 1; i < 5; i++) {
                 results[i].id.should.equal(i.toString());
                 should.exist(results[i].rev);
               }
@@ -272,7 +272,8 @@ adapters.forEach(function (adapter) {
     it('#2935 new_edits=false with single unauthorized', function (done) {
       testUtils.isCouchDB(function (isCouchDB) {
         if (adapter !== 'http' || !isCouchDB) {
-          return done();
+          done();
+          return;
         }
 
         const ddoc = {
@@ -800,16 +801,16 @@ adapters.forEach(function (adapter) {
       const docs = makeDocs(5);
       db.bulkDocs(docs, function (err, results) {
         results.should.have.length(5, 'results length matches');
-        for (var i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) {
           results[i].id.should.equal(docs[i]._id, 'id matches');
           should.exist(results[i].rev, 'rev is set');
           // Update the doc
           docs[i]._rev = results[i].rev;
-          docs[i].string = docs[i].string + '.00';
+          docs[i].string += '.00';
         }
         db.bulkDocs(docs, function (err, results) {
           results.should.have.length(5, 'results length matches');
-          for (i = 0; i < 5; i++) {
+          for (let i = 0; i < 5; i++) {
             results[i].id.should.equal(i.toString(), 'id matches again');
             // set the delete flag to delete the docs in the next step
             docs[i]._rev = results[i].rev;
@@ -821,7 +822,7 @@ adapters.forEach(function (adapter) {
                 'conflict', 'First doc should be in conflict'
               );
               should.not.exist(results[0].rev, 'no rev in conflict');
-              for (i = 1; i < 5; i++) {
+              for (let i = 1; i < 5; i++) {
                 results[i].id.should.equal(i.toString());
                 should.exist(results[i].rev);
               }
@@ -895,7 +896,7 @@ adapters.forEach(function (adapter) {
         _rev: numRevs + '-' + a_conflict,
         _revisions: {
           start: numRevs,
-          ids: [a_conflict].concat(uuids)
+          ids: [a_conflict, ...uuids]
         }
       };
 
@@ -906,7 +907,7 @@ adapters.forEach(function (adapter) {
         _rev: numRevs + '-' + b_conflict,
         _revisions: {
           start: numRevs,
-          ids: [b_conflict].concat(uuids)
+          ids: [b_conflict, ...uuids]
         }
       };
 
@@ -944,8 +945,8 @@ adapters.forEach(function (adapter) {
       }
 
       const isSafari = (typeof process === 'undefined' || process.browser) &&
-        (/Safari/).test(navigator.userAgent) &&
-        !(/Chrome/).test(navigator.userAgent);
+        (/Safari/v).test(navigator.userAgent) &&
+        !(/Chrome/v).test(navigator.userAgent);
 
       const numRevs = isSafari ? 10 : 5000;
       const expected = isSafari ? 10 : 1000;
@@ -961,7 +962,7 @@ adapters.forEach(function (adapter) {
         _rev: numRevs + '-' + conflict1,
         _revisions: {
           start: numRevs,
-          ids: [conflict1].concat(uuids)
+          ids: [conflict1, ...uuids]
         }
       };
 
@@ -975,7 +976,8 @@ adapters.forEach(function (adapter) {
     it('2839 implement revs_limit', function (done) {
       // We only implement revs_limit locally
       if (adapter === 'http') {
-        return done();
+        done();
+        return;
       }
 
       const LIMIT = 50;
@@ -1000,7 +1002,7 @@ adapters.forEach(function (adapter) {
         _rev: numRevs + '-' + conflict1,
         _revisions: {
           start: numRevs,
-          ids: [conflict1].concat(uuids)
+          ids: [conflict1, ...uuids]
         }
       };
 
@@ -1015,14 +1017,16 @@ adapters.forEach(function (adapter) {
     it('4372 revs_limit deletes old revisions of the doc', function (done) {
       // We only implement revs_limit locally
       if (adapter === 'http') {
-        return done();
+        done();
+        return;
       }
 
       const db = new PouchDB(dbs.name, {revs_limit: 2});
 
       // old revisions are always deleted with auto compaction
       if (db.auto_compaction) {
-        return done();
+        done();
+        return;
       }
 
       const revs = [];
@@ -1052,7 +1056,7 @@ adapters.forEach(function (adapter) {
       // CouchDB 1.X has a bug which allows this insertion via bulk_docs
       // (which PouchDB uses for all document insertions)
       if (adapter === 'http' && !testUtils.isCouchMaster()) {
-        return;
+        return undefined;
       }
 
       const db = new PouchDB(dbs.name);

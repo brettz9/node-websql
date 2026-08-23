@@ -266,7 +266,8 @@ describe('basic test suite', function () {
         });
       }, function (err) {
         if (!err) {
-          return reject(new Error('expected an error here'));
+          reject(new Error('expected an error here'));
+          return;
         }
         resolve();
       }, reject);
@@ -325,6 +326,7 @@ describe('basic test suite', function () {
               if (!err) {
                 return reject(new Error('expected an error here'));
               }
+              return undefined;
             });
           });
         });
@@ -360,7 +362,8 @@ describe('basic test suite', function () {
         });
       }, function (err) {
         if (!err) {
-          return reject(new Error('expected an error here'));
+          reject(new Error('expected an error here'));
+          return;
         }
         resolve();
       }, reject);
@@ -479,7 +482,7 @@ function getInsertId (res) {
   try {
     return res.insertId; // WebSQL will normally throw an error on access here
   } catch (err) {
-    return void 0;
+    return undefined;
   }
 }
 
@@ -507,14 +510,14 @@ describe('dedicated db test suite - in-memory', function () {
   it('returns correct rowsAffected/insertId 1', function () {
     const sql = 'SELECT 1 + 1';
     return transactionPromise(db, sql).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
     }).then(function () {
       const sql = 'SELECT 1 + 2';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
     });
@@ -536,7 +539,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, '3 rowsAffected == ' + res.rowsAffected);
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -562,7 +565,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -594,19 +597,19 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'UPDATE table1 SET text1 = "baz" WHERE text2 = "foobar";';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId 1');
+      assert.equal(getInsertId(res), undefined, 'no insertId 1');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
       const sql = 'UPDATE table1 SET text1 = "bongo" WHERE text2 = "haha";';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 1, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
       const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId 2');
+      assert.equal(getInsertId(res), undefined, 'no insertId 2');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 2, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -649,7 +652,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
       const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
@@ -658,7 +661,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 1);
       assert.equal(res.rows.length, 0);
     });
@@ -671,7 +674,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
       const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
@@ -683,7 +686,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 2);
       assert.equal(res.rows.length, 0);
     });
@@ -696,7 +699,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
     });
@@ -712,7 +715,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
     });
@@ -731,7 +734,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0);
+      assert.equal(getInsertId(res), undefined);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
     });
@@ -747,7 +750,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'SELECT * from table1';
       return readTransactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId 2');
+      assert.equal(getInsertId(res), undefined, 'no insertId 2');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -782,7 +785,7 @@ describe('dedicated db test suite - in-memory', function () {
       const sql = 'SELECT * from table1';
       return readTransactionPromise(db, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId 2');
+      assert.equal(getInsertId(res), undefined, 'no insertId 2');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -829,7 +832,7 @@ describe('dedicated db test suite - actual DB', function () {
       const sql = 'SELECT * from table1;';
       return transactionPromise(db1, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -839,7 +842,7 @@ describe('dedicated db test suite - actual DB', function () {
       const sql = 'SELECT * from table1;';
       return transactionPromise(db2, sql);
     }).then(function (res) {
-      assert.equal(getInsertId(res), void 0, 'no insertId');
+      assert.equal(getInsertId(res), undefined, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
       assert.deepEqual(res.rows.item(0), {
@@ -882,7 +885,7 @@ describe('advanced test suite - actual DB', function () {
     for (let i = 0; i < res.rows.length; i++) {
       output.push(res.rows.item(i));
     }
-    return JSON.parse(JSON.stringify(output));
+    return structuredClone(output);
   }
 
   it('handles errors and callback correctly 0', function () {
@@ -1776,7 +1779,8 @@ describe('advanced test suite - actual DB', function () {
        */
       function done () {
         if (rejected) {
-          return reject();
+          reject();
+          return;
         }
         resolve();
       }
@@ -1848,7 +1852,8 @@ describe('advanced test suite - actual DB', function () {
        */
       function done () {
         if (rejected) {
-          return reject();
+          reject();
+          return;
         }
         resolve();
       }
@@ -2001,7 +2006,7 @@ describe('advanced test suite - actual DB', function () {
     const called = [];
     return new Promise(function (resolve) {
       called.push('a');
-      var db2 = openDatabase('testdbs/testdb-' + Math.random(),
+      const db2 = openDatabase('testdbs/testdb-' + Math.random(),
         '1.0', 'yolo', 1, function (db3) {
           called.push('b');
           resolve([db2, db3]);
