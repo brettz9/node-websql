@@ -1,1 +1,1 @@
-{"version":3,"file":"SQLiteResult.d.ts","sourceRoot":"","sources":["../../../lib/sqlite/SQLiteResult.js"],"names":[],"mappings":";AAAA,6FAKC;;IALD,qEAKC;IAJC,WAAkB;IAClB,cAAwB;IACxB,kBAAgC;IAChC,UAAgB"}
+{"version":3,"file":"SQLiteResult.d.ts","sourceRoot":"","sources":["../../../lib/sqlite/SQLiteResult.js"],"names":[],"mappings":";AAAA;;GAEG;AACH;IACE;;;;;OAKG;IACH,mBALW,KAAK,GAAG,IAAI,aACZ,MAAM,iBACN,MAAM,SACN,OAAO,EAAE,EAOnB;IAJC,oBAAkB;IAClB,6BAAwB;IACxB,iCAAgC;IAChC,4BAAgB;CAEnB"}

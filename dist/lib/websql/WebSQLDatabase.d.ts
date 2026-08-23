@@ -1,45 +1,64 @@
 export default WebSQLDatabase;
-declare function WebSQLDatabase(dbVersion: any, db: any, webSQLOverrides: any): void;
+export type NonstandardTransCb = (currentTask: TransactionTask, err: Error | null, done: () => void, rollback: (err: Error | boolean, cb: () => void) => void, commit: (cb: () => void) => void) => boolean;
+/**
+ * The WebSQL `Database` object.
+ */
 declare class WebSQLDatabase {
-    constructor(dbVersion: any, db: any, webSQLOverrides: any);
-    version: any;
-    _db: any;
-    _txnQueue: any;
-    _running: boolean;
-    _currentTask: any;
-    _transactionDelay: any;
-    _executeDelay: any;
-    _onTransactionComplete(err: any): void;
-    _runTransaction(): void;
-    _runNextTransaction(): void;
-    _createTransaction(readOnly: any, txnCallback: any, errorCallback: any, successCallback: any, nonstandardTransCb: any): void;
     /**
-     * @param {(trans: import('./WebSQLTransaction.js').default) => void} txnCallback
-     * @param {(err: SQLError) => void} [errorCallback]
-     * @param {() => void} [successCallback]
-     * @param {(
-     *   currentTask: TransactionTask,
-     *   err: Error,
-     *   done: () => void,
-     *   rollback: (err: boolean|Error|SQLError, cb: () => void) => void,
-     *   commit: (cb: () => void) => void
-     * ) => boolean} [nonstandardTransCb]
+     * @param {string} dbVersion
+     * @param {import('../types.js').SqlDriver} db
+     * @param {import('../types.js').WebSQLOverrides} webSQLOverrides
      */
-    transaction(txnCallback: (trans: import('./WebSQLTransaction.js').default) => void, errorCallback?: ((err: SQLError) => void) | undefined, successCallback?: (() => void) | undefined, nonstandardTransCb?: ((currentTask: TransactionTask, err: Error, done: () => void, rollback: (err: boolean | Error | SQLError, cb: () => void) => void, commit: (cb: () => void) => void) => boolean) | undefined): void;
+    constructor(dbVersion: string, db: import("../types.js").SqlDriver, webSQLOverrides: import("../types.js").WebSQLOverrides);
+    version: string;
+    _db: import("../types.js").SqlDriver;
+    /** @type {import('tiny-queue').default<TransactionTask>} */
+    _txnQueue: import("tiny-queue").default<TransactionTask>;
+    _running: boolean;
+    /** @type {TransactionTask | null} */
+    _currentTask: TransactionTask | null;
+    _transactionDelay: typeof immediate | import("../types.js").Delay;
+    _executeDelay: typeof immediate | import("../types.js").Delay;
     /**
-     * @param {(trans: import('./WebSQLTransaction.js').default) => void} txnCallback
+     * Not a true `#private` method: `WebSQLTransaction` calls this on its
+     * owning `WebSQLDatabase` once it's finished running its SQL queue.
+     * @param {Error | null} err
+     * @param {WebSQLTransaction} transaction
+     */
+    _onTransactionComplete(err: Error | null, transaction: WebSQLTransaction): void;
+    /**
+     * @param {(trans: WebSQLTransaction) => void} txnCallback
+     * @param {(err: Error) => void} [errorCallback]
+     * @param {() => void} [successCallback]
+     * @param {NonstandardTransCb} [nonstandardTransCb]
+     */
+    transaction(txnCallback: (trans: WebSQLTransaction) => void, errorCallback?: (err: Error) => void, successCallback?: () => void, nonstandardTransCb?: NonstandardTransCb): void;
+    /**
+     * @param {(trans: WebSQLTransaction) => void} txnCallback
      * @param {(err: Error) => void} [errorCallback]
      * @param {() => void} [successCallback]
      */
-    readTransaction(txnCallback: (trans: import('./WebSQLTransaction.js').default) => void, errorCallback?: ((err: Error) => void) | undefined, successCallback?: (() => void) | undefined): void;
+    readTransaction(txnCallback: (trans: WebSQLTransaction) => void, errorCallback?: (err: Error) => void, successCallback?: () => void): void;
+    #private;
 }
-declare function TransactionTask(readOnly: any, txnCallback: any, errorCallback: any, successCallback: any, nonstandardTransCb: any): void;
-declare class TransactionTask {
-    constructor(readOnly: any, txnCallback: any, errorCallback: any, successCallback: any, nonstandardTransCb: any);
-    readOnly: any;
-    txnCallback: any;
-    errorCallback: any;
-    successCallback: any;
-    nonstandardTransCb: any;
+/**
+ * V8 likes predictable objects.
+ */
+export class TransactionTask {
+    /**
+     * @param {boolean} readOnly
+     * @param {(trans: WebSQLTransaction) => void} txnCallback
+     * @param {(err: Error) => void} errorCallback
+     * @param {() => void} successCallback
+     * @param {NonstandardTransCb} [nonstandardTransCb]
+     */
+    constructor(readOnly: boolean, txnCallback: (trans: WebSQLTransaction) => void, errorCallback: (err: Error) => void, successCallback: () => void, nonstandardTransCb?: NonstandardTransCb);
+    readOnly: boolean;
+    txnCallback: (trans: WebSQLTransaction) => void;
+    errorCallback: (err: Error) => void;
+    successCallback: () => void;
+    nonstandardTransCb: NonstandardTransCb | undefined;
 }
+import immediate from 'immediate';
+import WebSQLTransaction from './WebSQLTransaction.js';
 //# sourceMappingURL=WebSQLDatabase.d.ts.map

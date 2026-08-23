@@ -13,9 +13,12 @@
     "strict": true,
     "target": "es2024",
     "outDir": "dist",
-    "types": ["node", "websql"]
+    "types": ["node"]
   },
   // "test/**/*.js",
-  "include": ["lib/**/*.js", "lib/**/*.d.ts", "custom/**/*.js"],
+  // `index.d.ts` (not `@types/websql`) is this project's one source of the
+  // WebSQL spec's global types (SQLError, ObjectArray, Database, etc.) --
+  // having both in the same program declares SQLError/SQLException twice.
+  "include": ["lib/**/*.js", "lib/**/*.d.ts", "custom/**/*.js", "index.d.ts"],
   "exclude": ["node_modules"]
 }

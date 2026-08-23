@@ -1,16 +1,31 @@
 export default WebSQLResultSet;
-declare function WebSQLResultSet(insertId: any, rowsAffected: any, rows: any): void;
+/**
+ *
+ */
 declare class WebSQLResultSet {
-    constructor(insertId: any, rowsAffected: any, rows: any);
-    insertId: any;
-    rowsAffected: any;
+    /**
+     * @param {number} [insertId]
+     * @param {number} [rowsAffected]
+     * @param {unknown[]} [rows]
+     */
+    constructor(insertId?: number, rowsAffected?: number, rows?: unknown[]);
+    insertId: number | undefined;
+    rowsAffected: number | undefined;
     rows: WebSQLRows;
 }
-declare function WebSQLRows(array: any): void;
+/**
+ *
+ */
 declare class WebSQLRows {
-    constructor(array: any);
-    _array: any;
-    length: any;
-    item(i: any): any;
+    /**
+     * @param {unknown[]} array
+     */
+    constructor(array: unknown[]);
+    _array: unknown[];
+    length: number;
+    /**
+     * @param {number} i
+     */
+    item(i: number): unknown;
 }
 //# sourceMappingURL=WebSQLResultSet.d.ts.map

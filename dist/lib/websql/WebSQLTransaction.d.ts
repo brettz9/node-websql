@@ -1,20 +1,73 @@
 export default WebSQLTransaction;
-declare function WebSQLTransaction(websqlDatabase: any, executeDelay: any): void;
+/**
+ * These deliberately don't reuse the WebSQL spec's global
+ * `SQLStatementCallback`/`SQLStatementErrorCallback`/`SQLError` types:
+ * this library never constructs a real `SQLError` (errors here are
+ * always plain `Error`s coming from the underlying SQL driver), and
+ * `WebSQLResultSet#insertId`/`rowsAffected` are genuinely `number |
+ * undefined` (see `massageSQLResult` below), which the spec's
+ * `SQLResultSet` doesn't allow. Typing against the spec here would just
+ * paper over that mismatch with unsound casts.
+ */
+export type SqlCallback = (transaction: WebSQLTransaction, resultSet: WebSQLResultSet) => void;
+/**
+ * These deliberately don't reuse the WebSQL spec's global
+ * `SQLStatementCallback`/`SQLStatementErrorCallback`/`SQLError` types:
+ * this library never constructs a real `SQLError` (errors here are
+ * always plain `Error`s coming from the underlying SQL driver), and
+ * `WebSQLResultSet#insertId`/`rowsAffected` are genuinely `number |
+ * undefined` (see `massageSQLResult` below), which the spec's
+ * `SQLResultSet` doesn't allow. Typing against the spec here would just
+ * paper over that mismatch with unsound casts.
+ */
+export type SqlErrorCallback = (transaction: WebSQLTransaction, error: Error) => boolean | void;
+/**
+ *
+ */
 declare class WebSQLTransaction {
-    constructor(websqlDatabase: any, executeDelay: any);
-    _websqlDatabase: any;
-    _error: any;
+    /**
+     * @param {import('./WebSQLDatabase.js').default} websqlDatabase
+     * @param {import('../types.js').Delay} [executeDelay]
+     */
+    constructor(websqlDatabase: import("./WebSQLDatabase.js").default, executeDelay?: import("../types.js").Delay);
+    _websqlDatabase: import("./WebSQLDatabase.js").default;
+    /** @type {Error | null} */
+    _error: Error | null;
     _complete: boolean;
+    _running: boolean;
     _runningTimeout: boolean;
-    _executeDelay: any;
-    _sqlQueue: any;
+    _executeDelay: typeof immediate | import("../types.js").Delay;
+    /** @type {import('tiny-queue').default<SQLTask>} */
+    _sqlQueue: import("tiny-queue").default<SQLTask>;
     /**
      * @param {string} sql
-     * @param {ObjectArray} args
-     * @param {SQLStatementCallback} sqlCallback
-     * @param {SQLStatementErrorCallback} sqlErrorCallback
+     * @param {unknown[]} [args]
+     * @param {SqlCallback} [sqlCallback]
+     * @param {SqlErrorCallback} [sqlErrorCallback]
      */
-    executeSql(sql: string, args: ObjectArray, sqlCallback: SQLStatementCallback, sqlErrorCallback: SQLStatementErrorCallback): void;
+    executeSql(sql: string, args?: unknown[], sqlCallback?: SqlCallback, sqlErrorCallback?: SqlErrorCallback): void;
+    /**
+     * Not a true `#private` method: `WebSQLDatabase` calls this right after
+     * handing a freshly-created transaction to the caller's `txnCallback`.
+     */
     _checkDone(): void;
+}
+import WebSQLResultSet from './WebSQLResultSet.js';
+import immediate from 'immediate';
+/**
+ *
+ */
+declare class SQLTask {
+    /**
+     * @param {string} sql
+     * @param {unknown[]} args
+     * @param {SqlCallback} sqlCallback
+     * @param {SqlErrorCallback} sqlErrorCallback
+     */
+    constructor(sql: string, args: unknown[], sqlCallback: SqlCallback, sqlErrorCallback: SqlErrorCallback);
+    sql: string;
+    args: unknown[];
+    sqlCallback: SqlCallback;
+    sqlErrorCallback: SqlErrorCallback;
 }
 //# sourceMappingURL=WebSQLTransaction.d.ts.map

@@ -1,10 +1,18 @@
 export default SQLiteResult;
-declare function SQLiteResult(error: any, insertId: any, rowsAffected: any, rows: any): void;
+/**
+ *
+ */
 declare class SQLiteResult {
-    constructor(error: any, insertId: any, rowsAffected: any, rows: any);
-    error: any;
-    insertId: any;
-    rowsAffected: any;
-    rows: any;
+    /**
+     * @param {Error | null} error
+     * @param {number} [insertId]
+     * @param {number} [rowsAffected]
+     * @param {unknown[]} [rows]
+     */
+    constructor(error: Error | null, insertId?: number, rowsAffected?: number, rows?: unknown[]);
+    error: Error | null;
+    insertId: number | undefined;
+    rowsAffected: number | undefined;
+    rows: unknown[] | undefined;
 }
 //# sourceMappingURL=SQLiteResult.d.ts.map
