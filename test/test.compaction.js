@@ -2,9 +2,9 @@ import PouchDB from './pouchdb.js';
 import chai from 'chai';
 import testUtils from './test.utils.js';
 
-var should = chai.should();
-var adapters = ['local'];
-var autoCompactionAdapters = ['local'];
+const should = chai.should();
+const adapters = ['local'];
+const autoCompactionAdapters = ['local'];
 
 adapters.forEach(function (adapter) {
   describe('test.compaction.js-' + adapter, function () {
@@ -12,7 +12,7 @@ adapters.forEach(function (adapter) {
       return true;
     }
 
-    var dbs = {};
+    const dbs = {};
 
     beforeEach(function (done) {
       dbs.name = testUtils.adapterUrl(adapter, 'testdb');
@@ -24,7 +24,7 @@ adapters.forEach(function (adapter) {
     });
 
     it('#3350 compact should return {ok: true}', function (done) {
-      var db = new PouchDB(dbs.name);
+      const db = new PouchDB(dbs.name);
       db.compact(function (err, result) {
         should.not.exist(err);
         result.should.eql({ok: true});
@@ -34,21 +34,21 @@ adapters.forEach(function (adapter) {
     });
 
     it('compact with options object', function () {
-      var db = new PouchDB(dbs.name);
+      const db = new PouchDB(dbs.name);
       return db.compact({}).then(function (result) {
         result.should.eql({ok: true});
       });
     });
 
     it.skip('#2913 massively parallel compaction', function () {
-      var db = new PouchDB(dbs.name);
-      var tasks = [];
-      for (var i = 0; i < 30; i++) {
+      const db = new PouchDB(dbs.name);
+      const tasks = [];
+      for (let i = 0; i < 30; i++) {
         tasks.push(i);
       }
 
       return PouchDB.utils.Promise.all(tasks.map(function (i) {
-        var doc = {_id: 'doc_' + i};
+        const doc = {_id: 'doc_' + i};
         return db.put(doc).then(function () {
           return db.compact();
         }).then(function () {
@@ -62,8 +62,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compaction document with no revisions to remove', function (done) {
-      var db = new PouchDB(dbs.name);
-      var doc = {_id: 'foo', value: 'bar'};
+      const db = new PouchDB(dbs.name);
+      const doc = {_id: 'foo', value: 'bar'};
       db.put(doc, function () {
         db.compact(function () {
           db.get('foo', function (err) {
@@ -74,38 +74,38 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compation on empty db', function (done) {
-      var db = new PouchDB(dbs.name);
+      const db = new PouchDB(dbs.name);
       db.compact(function () {
         done();
       });
     });
 
     it('Compation on empty db with interval option', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.compact({ interval: 199 }, function () {
+      const db = new PouchDB(dbs.name);
+      db.compact({interval: 199}, function () {
         done();
       });
     });
 
     it('Simple compation test', function (done) {
-      var db = new PouchDB(dbs.name);
-      var doc = {
+      const db = new PouchDB(dbs.name);
+      const doc = {
         _id: 'foo',
         value: 'bar'
       };
       db.post(doc, function (err, res) {
-        var rev1 = res.rev;
+        const rev1 = res.rev;
         doc._rev = rev1;
         doc.value = 'baz';
         db.post(doc, function (err, res) {
-          var rev2 = res.rev;
+          const rev2 = res.rev;
           db.compact(function () {
-            db.get('foo', { rev: rev1 }, function (err) {
+            db.get('foo', {rev: rev1}, function (err) {
               err.status.should.equal(404);
               err.name.should.equal(
                 'not_found', 'compacted document is missing'
               );
-              db.get('foo', { rev: rev2 }, function (err) {
+              db.get('foo', {rev: rev2}, function (err) {
                 done(err);
               });
             });
@@ -114,10 +114,14 @@ adapters.forEach(function (adapter) {
       });
     });
 
-    var checkBranch = function (db, docs, callback) {
-      function check(i) {
-        var doc = docs[i];
-        db.get(doc._id, { rev: doc._rev }, function (err) {
+    const checkBranch = function (db, docs, callback) {
+      /**
+       *
+       * @param i
+       */
+      function check (i) {
+        const doc = docs[i];
+        db.get(doc._id, {rev: doc._rev}, function (err) {
           if (i < docs.length - 1) {
             should.exist(err, 'should be compacted: ' + doc._rev);
             err.status.should.equal(404, 'compacted!');
@@ -131,8 +135,12 @@ adapters.forEach(function (adapter) {
       check(0);
     };
 
-    var checkTree = function (db, tree, callback) {
-      function check(i) {
+    const checkTree = function (db, tree, callback) {
+      /**
+       *
+       * @param i
+       */
+      function check (i) {
         checkBranch(db, tree[i], function () {
           if (i < tree.length - 1) {
             check(i + 1);
@@ -144,38 +152,32 @@ adapters.forEach(function (adapter) {
       check(0);
     };
 
-    var exampleTree = [
+    const exampleTree = [
       [{_id: 'foo', _rev: '1-a', value: 'foo a'},
-       {_id: 'foo', _rev: '2-b', value: 'foo b'},
-       {_id: 'foo', _rev: '3-c', value: 'foo c'}
-      ],
+        {_id: 'foo', _rev: '2-b', value: 'foo b'},
+        {_id: 'foo', _rev: '3-c', value: 'foo c'}],
       [{_id: 'foo', _rev: '1-a', value: 'foo a'},
-       {_id: 'foo', _rev: '2-d', value: 'foo d'},
-       {_id: 'foo', _rev: '3-e', value: 'foo e'},
-       {_id: 'foo', _rev: '4-f', value: 'foo f'}
-      ],
+        {_id: 'foo', _rev: '2-d', value: 'foo d'},
+        {_id: 'foo', _rev: '3-e', value: 'foo e'},
+        {_id: 'foo', _rev: '4-f', value: 'foo f'}],
       [{_id: 'foo', _rev: '1-a', value: 'foo a'},
-       {_id: 'foo', _rev: '2-g', value: 'foo g'},
-       {_id: 'foo', _rev: '3-h', value: 'foo h'},
-       {_id: 'foo', _rev: '4-i', value: 'foo i'},
-       {_id: 'foo', _rev: '5-j', _deleted: true, value: 'foo j'}
-      ]
+        {_id: 'foo', _rev: '2-g', value: 'foo g'},
+        {_id: 'foo', _rev: '3-h', value: 'foo h'},
+        {_id: 'foo', _rev: '4-i', value: 'foo i'},
+        {_id: 'foo', _rev: '5-j', _deleted: true, value: 'foo j'}]
     ];
 
-    var exampleTree2 = [
+    const exampleTree2 = [
       [{_id: 'bar', _rev: '1-m', value: 'bar m'},
-       {_id: 'bar', _rev: '2-n', value: 'bar n'},
-       {_id: 'bar', _rev: '3-o', _deleted: true, value: 'foo o'}
-      ],
+        {_id: 'bar', _rev: '2-n', value: 'bar n'},
+        {_id: 'bar', _rev: '3-o', _deleted: true, value: 'foo o'}],
       [{_id: 'bar', _rev: '2-n', value: 'bar n'},
-       {_id: 'bar', _rev: '3-p', value: 'bar p'},
-       {_id: 'bar', _rev: '4-r', value: 'bar r'},
-       {_id: 'bar', _rev: '5-s', value: 'bar s'}
-      ],
+        {_id: 'bar', _rev: '3-p', value: 'bar p'},
+        {_id: 'bar', _rev: '4-r', value: 'bar r'},
+        {_id: 'bar', _rev: '5-s', value: 'bar s'}],
       [{_id: 'bar', _rev: '3-p', value: 'bar p'},
-       {_id: 'bar', _rev: '4-t', value: 'bar t'},
-       {_id: 'bar', _rev: '5-u', value: 'bar u'}
-      ]
+        {_id: 'bar', _rev: '4-t', value: 'bar t'},
+        {_id: 'bar', _rev: '5-u', value: 'bar u'}]
     ];
 
     it('Compact more complicated tree', function (done) {
@@ -191,7 +193,7 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compact two times more complicated tree', function (done) {
-      var db = new PouchDB(dbs.name);
+      const db = new PouchDB(dbs.name);
       testUtils.putTree(db, exampleTree, function () {
         db.compact(function () {
           db.compact(function () {
@@ -204,7 +206,7 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compact database with at least two documents', function (done) {
-      var db = new PouchDB(dbs.name);
+      const db = new PouchDB(dbs.name);
       testUtils.putTree(db, exampleTree, function () {
         testUtils.putTree(db, exampleTree2, function () {
           db.compact(function () {
@@ -219,20 +221,20 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compact deleted document', function (done) {
-      var db = new PouchDB(dbs.name);
-      db.put({ _id: 'foo' }, function (err, res) {
-        var firstRev = res.rev;
+      const db = new PouchDB(dbs.name);
+      db.put({_id: 'foo'}, function (err, res) {
+        const firstRev = res.rev;
         db.remove({
           _id: 'foo',
           _rev: firstRev
         }, function () {
           db.compact(function () {
-            db.get('foo', { rev: firstRev }, function (err) {
+            db.get('foo', {rev: firstRev}, function (err) {
               should.exist(err, 'got error');
               err.status.should.equal(PouchDB.Errors.MISSING_DOC.status,
-                                      'correct error status returned');
+                'correct error status returned');
               err.message.should.equal(PouchDB.Errors.MISSING_DOC.message,
-                                   'correct error message returned');
+                'correct error message returned');
               done();
             });
           });
@@ -241,21 +243,21 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compact db with sql-injecty doc id', function (done) {
-      var db = new PouchDB(dbs.name);
-      var id = '\'sql_injection_here';
-      db.put({ _id: id }, function (err, res) {
-        var firstRev = res.rev;
+      const db = new PouchDB(dbs.name);
+      const id = '\'sql_injection_here';
+      db.put({_id: id}, function (err, res) {
+        const firstRev = res.rev;
         db.remove({
           _id: id,
           _rev: firstRev
         }, function () {
           db.compact(function () {
-            db.get(id, { rev: firstRev }, function (err) {
+            db.get(id, {rev: firstRev}, function (err) {
               should.exist(err, 'got error');
               err.status.should.equal(PouchDB.Errors.MISSING_DOC.status,
-                                      'correct error status returned');
+                'correct error status returned');
               err.message.should.equal(PouchDB.Errors.MISSING_DOC.message,
-                                   'correct error message returned');
+                'correct error message returned');
               done();
             });
           });
@@ -264,30 +266,36 @@ adapters.forEach(function (adapter) {
     });
 
 
-    function getRevisions(db, docId) {
+    /**
+     *
+     * @param db
+     * @param docId
+     */
+    function getRevisions (db, docId) {
       return db.get(docId, {
         revs: true,
         open_revs: 'all'
       }).then(function (docs) {
-        var combinedResult = [];
+        let combinedResult = [];
         return PouchDB.utils.Promise.all(docs.map(function (doc) {
           doc = doc.ok;
           // convert revision IDs into full _rev hashes
-          var start = doc._revisions.start;
+          const {start} = doc._revisions;
           return PouchDB.utils.Promise.all(
             doc._revisions.ids.map(function (id, i) {
-              var rev = (start - i) + '-' + id;
-              return db.get(docId, {rev: rev}).then(function (doc) {
-                return { rev: rev, doc: doc };
+              const rev = (start - i) + '-' + id;
+              return db.get(docId, {rev}).then(function (doc) {
+                return {rev, doc};
               }).catch(function (err) {
                 if (err.status !== 404) {
                   throw err;
                 }
-                return { rev: rev };
+                return {rev};
               });
-            })).then(function (docsAndRevs) {
-              combinedResult = combinedResult.concat(docsAndRevs);
-            });
+            })
+          ).then(function (docsAndRevs) {
+            combinedResult = combinedResult.concat(docsAndRevs);
+          });
         })).then(function () {
           return combinedResult;
         });
@@ -295,8 +303,8 @@ adapters.forEach(function (adapter) {
     }
 
     it('Compaction removes non-leaf revs (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return getRevisions(db, 'foo');
@@ -321,8 +329,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compaction removes non-leaf revs pt 2 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return db.put(doc);
@@ -342,26 +350,26 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compaction removes non-leaf revs pt 3 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
 
-      var docs = [
+      const docs = [
         {
           _id: 'foo',
           _rev: '1-a1',
-          _revisions: { start: 1, ids: [ 'a1' ] }
+          _revisions: {start: 1, ids: ['a1']}
         }, {
           _id: 'foo',
           _rev: '2-a2',
-          _revisions: { start: 2, ids: [ 'a2', 'a1' ] }
+          _revisions: {start: 2, ids: ['a2', 'a1']}
         }, {
           _id: 'foo',
           _deleted: true,
           _rev: '3-a3',
-          _revisions: { start: 3, ids: [ 'a3', 'a2', 'a1' ] }
+          _revisions: {start: 3, ids: ['a3', 'a2', 'a1']}
         }, {
           _id: 'foo',
           _rev: '1-b1',
-          _revisions: { start: 1, ids: [ 'b1' ] }
+          _revisions: {start: 1, ids: ['b1']}
         }
       ];
 
@@ -378,7 +386,7 @@ adapters.forEach(function (adapter) {
         return getRevisions(db, 'foo');
       }).then(function (docsAndRevs) {
         docsAndRevs.should.have.length(4);
-        var asMap = {};
+        const asMap = {};
         docsAndRevs.forEach(function (docAndRev) {
           asMap[docAndRev.rev] = docAndRev.doc;
         });
@@ -394,8 +402,8 @@ adapters.forEach(function (adapter) {
       if (testUtils.isCouchMaster()) {
         return true;
       }
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         doc._deleted = true;
@@ -417,8 +425,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Compaction removes non-leaf revs pt 5 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return db.put(doc);
@@ -439,26 +447,25 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('#2931 - synchronous putAttachment + compact', function () {
+      const db = new PouchDB(dbs.name);
+      let queue = db.put({_id: 'doc'});
 
-      var db = new PouchDB(dbs.name);
-      var queue = db.put({_id: 'doc'});
+      const otherPromises = [];
 
-      var otherPromises = [];
-
-      for (var i = 0; i < 50; i++) {
-
+      for (let i = 0; i < 50; i++) {
         queue = queue.then(function () {
           return db.get('doc').then(function (doc) {
             doc._attachments = doc._attachments || {};
-            var blob = testUtils.makeBlob(
+            const blob = testUtils.makeBlob(
               PouchDB.utils.btoa(Math.random().toString()),
-              'text/plain');
+              'text/plain'
+            );
             return db.putAttachment(doc._id, 'att.txt', doc._rev, blob,
               'text/plain');
           });
         });
         queue.then(function () {
-          var promise = PouchDB.utils.Promise.all([
+          const promise = PouchDB.utils.Promise.all([
             db.compact(),
             db.compact(),
             db.compact(),
@@ -475,20 +482,19 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('#2931 - synchronous putAttachment + compact 2', function () {
+      const db = new PouchDB(dbs.name);
+      let queue = db.put({_id: 'doc'});
 
-      var db = new PouchDB(dbs.name);
-      var queue = db.put({_id: 'doc'});
+      let compactQueue = PouchDB.utils.Promise.resolve();
 
-      var compactQueue = PouchDB.utils.Promise.resolve();
-
-      for (var i = 0; i < 50; i++) {
-
+      for (let i = 0; i < 50; i++) {
         queue = queue.then(function () {
           return db.get('doc').then(function (doc) {
             doc._attachments = doc._attachments || {};
-            var blob = testUtils.makeBlob(
+            const blob = testUtils.makeBlob(
               PouchDB.utils.btoa(Math.random().toString()),
-              'text/plain');
+              'text/plain'
+            );
             return db.putAttachment(doc._id, 'att.txt', doc._rev, blob,
               'text/plain');
           });
@@ -517,7 +523,7 @@ adapters.forEach(function (adapter) {
     //
 
 
-    if (autoCompactionAdapters.indexOf(adapter) === -1) {
+    if (!autoCompactionAdapters.includes(adapter)) {
       return;
     }
 
@@ -530,12 +536,12 @@ adapters.forEach(function (adapter) {
 
     // per https://en.wikipedia.org/wiki/MD5,
     // these two should have colliding md5sums
-    var att1 = '0THdAsXm7sRpPZoGmK/5XC/KtQcSRn6r' +
+    const att1 = '0THdAsXm7sRpPZoGmK/5XC/KtQcSRn6r' +
       'QARYPrj7f4lVrTQGCfSzAoPkiIMl8UFaCFEl6PfNyZ/Z' +
       'Hb1ygDc8W9iCPjFWNI9brm2s1DbJGcbdU+I0h9oD/' +
       'QI5YwbSSM2g6Z8zQg9XfujOVLZwgCgNHsaY' +
       'Iby2qIOTlvllq2/3KnA=';
-    var att2 = '0THdAsXm7sRpPZoGmK/5XC/KtYcSRn6r' +
+    const att2 = '0THdAsXm7sRpPZoGmK/5XC/KtYcSRn6r' +
       'QARYPrj7f4lVrTQGCfSzAoPkiIMlcUFaCFEl6PfNyZ/Z' +
       'Hb3ygDc8W9iCPjFWNI9brm2s1DbJGcbdU+K0h9oD/' +
       'QI5YwbSSM2g6Z8zQg9XfujOVLZwgKgNHsaY' +
@@ -545,8 +551,8 @@ adapters.forEach(function (adapter) {
       //
       // CouchDB will throw!
       //
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc1 = {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc1 = {
         _id: 'doc1',
         _attachments: {
           'att.txt': {
@@ -555,7 +561,7 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var doc2 = {
+      const doc2 = {
         _id: 'doc2',
         _attachments: {
           'att.txt': {
@@ -564,11 +570,11 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var doc3 = {
+      const doc3 = {
         _id: 'doc3',
         _attachments: {
           'att.txt': {
-            data: '1' + att2.substring(1), // distractor
+            data: '1' + att2.slice(1), // distractor
             content_type: 'application/octet-stream'
           }
         }
@@ -580,9 +586,9 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.allDocs({include_docs: true});
       }).then(function (res) {
-        var md1 = res.rows[0].doc._attachments['att.txt'].digest;
-        var md2 = res.rows[1].doc._attachments['att.txt'].digest;
-        var md3 = res.rows[2].doc._attachments['att.txt'].digest;
+        const md1 = res.rows[0].doc._attachments['att.txt'].digest;
+        const md2 = res.rows[1].doc._attachments['att.txt'].digest;
+        const md3 = res.rows[2].doc._attachments['att.txt'].digest;
         md1.should.not.equal(md3, 'md5 sums should not collide');
         md2.should.not.equal(md3, 'md5 sums should not collide');
         md1.should.equal(md2,
@@ -591,12 +597,12 @@ adapters.forEach(function (adapter) {
         return PouchDB.utils.Promise.all(['doc1', 'doc2'].map(function (id) {
           return db.get(id, {attachments: true});
         })).then(function (docs) {
-          var data1 = docs[0]._attachments['att.txt'].data;
-          var data2 = docs[1]._attachments['att.txt'].data;
+          const data1 = docs[0]._attachments['att.txt'].data;
+          const data2 = docs[1]._attachments['att.txt'].data;
           data1.should.equal(data2,
             'yay, we are vulnerable to md5sum collision (1)');
           att1.should.equal(data2,
-              'att1 is the final one, not att2');
+            'att1 is the final one, not att2');
         });
       });
     });
@@ -605,8 +611,8 @@ adapters.forEach(function (adapter) {
       //
       // CouchDB will throw!
       //
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc1 = {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc1 = {
         _id: 'doc1',
         _attachments: {
           'att.txt': {
@@ -615,8 +621,8 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var rev1;
-      var rev2;
+      let rev1;
+      let rev2;
       return db.put(doc1).then(function (res) {
         rev1 = doc1._rev = res.rev;
         doc1._attachments['att.txt'].data = att2;
@@ -624,11 +630,11 @@ adapters.forEach(function (adapter) {
       }).then(function (res) {
         rev2 = res.rev;
         return PouchDB.utils.Promise.all([rev1, rev2].map(function (rev) {
-          return db.get('doc1', {rev: rev, attachments: true});
+          return db.get('doc1', {rev, attachments: true});
         }));
       }).then(function (docs) {
-        var data1 = docs[0]._attachments['att.txt'].data;
-        var data2 = docs[1]._attachments['att.txt'].data;
+        const data1 = docs[0]._attachments['att.txt'].data;
+        const data2 = docs[1]._attachments['att.txt'].data;
         data1.should.equal(data2,
           'yay, we are vulnerable to md5sum collision');
       });
@@ -638,8 +644,8 @@ adapters.forEach(function (adapter) {
       //
       // CouchDB will throw!
       //
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc1 = {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc1 = {
         _id: 'doc1',
         _attachments: {
           'att.txt': {
@@ -652,7 +658,7 @@ adapters.forEach(function (adapter) {
       return db.put(doc1).then(function () {
         return db.get('doc1');
       }).then(function (doc1) {
-        var doc2 = {
+        const doc2 = {
           _id: 'doc2',
           _attachments: {
             'att.txt': {
@@ -669,8 +675,8 @@ adapters.forEach(function (adapter) {
     it('#2818 Compaction removes attachments', function () {
       // now that we've established no 412s thanks to digests,
       // we can use that to detect true attachment deletion
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {
         _id: 'doc1',
         _attachments: {
           'deleteme.txt': {
@@ -679,7 +685,7 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var digest;
+      let digest;
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
@@ -696,8 +702,8 @@ adapters.forEach(function (adapter) {
         return db.get('doc1');
       }).then(function (doc) {
         doc._attachments['newatt.txt'] = {
-          content_type: "text/plain",
-          digest: digest,
+          content_type: 'text/plain',
+          digest,
           stub: true
         };
         return db.put(doc).then(function () {
@@ -709,13 +715,13 @@ adapters.forEach(function (adapter) {
     });
 
     it('#2818 Compaction removes attachments given conflicts', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
 
-      var docs = [
+      const docs = [
         {
           _id: 'fubar',
           _rev: '1-a1',
-          _revisions: { start: 1, ids: [ 'a1' ] },
+          _revisions: {start: 1, ids: ['a1']},
           _attachments: {
             'att.txt': {
               data: 'Zm9vYmFy', // 'foobar'
@@ -725,7 +731,7 @@ adapters.forEach(function (adapter) {
         }, {
           _id: 'fubar',
           _rev: '2-a2',
-          _revisions: { start: 2, ids: [ 'a2', 'a1' ] },
+          _revisions: {start: 2, ids: ['a2', 'a1']},
           _attachments: {
             'att.txt': {
               data: 'dG90bw==', // 'toto'
@@ -735,7 +741,7 @@ adapters.forEach(function (adapter) {
         }, {
           _id: 'fubar',
           _rev: '3-a3',
-          _revisions: { start: 3, ids: [ 'a3', 'a2', 'a1' ] },
+          _revisions: {start: 3, ids: ['a3', 'a2', 'a1']},
           _attachments: {
             'att.txt': {
               data: 'Ym9uZ28=', // 'bongo'
@@ -745,7 +751,7 @@ adapters.forEach(function (adapter) {
         }, {
           _id: 'fubar',
           _rev: '1-b1',
-          _revisions: { start: 1, ids: [ 'b1' ] },
+          _revisions: {start: 1, ids: ['b1']},
           _attachments: {
             'att.txt': {
               data: 'enV6dQ==', // 'zuzu'
@@ -755,33 +761,32 @@ adapters.forEach(function (adapter) {
         }
       ];
 
-      var allDigests = [];
-      var digestsToForget = [];
-      var digestsToRemember = [];
+      let allDigests = [];
+      const digestsToForget = [];
+      const digestsToRemember = [];
       return db.bulkDocs({
-        docs: docs,
+        docs,
         new_edits: false
       }).then(function () {
         return PouchDB.utils.Promise.all([
           '1-a1', '2-a2', '3-a3', '1-b1'
         ].map(function (rev) {
-          return db.get('fubar', {rev: rev, attachments: true});
+          return db.get('fubar', {rev, attachments: true});
         }));
       }).then(function (docs) {
-        digestsToForget.push(docs[0]._attachments['att.txt'].digest);
-        digestsToForget.push(docs[1]._attachments['att.txt'].digest);
-        digestsToRemember.push(docs[2]._attachments['att.txt'].digest);
-        digestsToRemember.push(docs[3]._attachments['att.txt'].digest);
+        digestsToForget.push(docs[0]._attachments['att.txt'].digest, docs[1]._attachments['att.txt'].digest);
+        digestsToRemember.push(docs[2]._attachments['att.txt'].digest, docs[3]._attachments['att.txt'].digest);
 
         allDigests = allDigests.concat(digestsToForget).concat(
-          digestsToRemember);
+          digestsToRemember
+        );
 
         return PouchDB.utils.Promise.all(allDigests.map(function (digest) {
-          var doc = {
+          const doc = {
             _attachments: {
               'newatt.txt': {
-                content_type: "text/plain",
-                digest: digest,
+                content_type: 'text/plain',
+                digest,
                 stub: true
               }
             }
@@ -794,42 +799,44 @@ adapters.forEach(function (adapter) {
         return db.compact();
       }).then(function () {
         return PouchDB.utils.Promise.all(digestsToForget.map(
-            function (digest) {
-          var doc = {
-            _attachments: {
-              'newatt.txt': {
-                content_type: "text/plain",
-                digest: digest,
-                stub: true
+          function (digest) {
+            const doc = {
+              _attachments: {
+                'newatt.txt': {
+                  content_type: 'text/plain',
+                  digest,
+                  stub: true
+                }
               }
-            }
-          };
-          return db.post(doc).then(function () {
-            throw new Error('shouldn\'t have gotten here');
-          }, function (err) {
-            err.status.should.equal(412);
-          });
-        }));
+            };
+            return db.post(doc).then(function () {
+              throw new Error('shouldn\'t have gotten here');
+            }, function (err) {
+              err.status.should.equal(412);
+            });
+          }
+        ));
       }).then(function () {
         return PouchDB.utils.Promise.all(digestsToRemember.map(
-            function (digest) {
-          var doc = {
-            _attachments: {
-              'newatt.txt': {
-                content_type: "text/plain",
-                digest: digest,
-                stub: true
+          function (digest) {
+            const doc = {
+              _attachments: {
+                'newatt.txt': {
+                  content_type: 'text/plain',
+                  digest,
+                  stub: true
+                }
               }
-            }
-          };
-          return db.post(doc);
-        }));
+            };
+            return db.post(doc);
+          }
+        ));
       });
     });
 
     it('#2818 Compaction retains attachments if unorphaned', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = {
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {
         _id: 'doc1',
         _attachments: {
           'deleteme.txt': {
@@ -838,7 +845,7 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var digest;
+      let digest;
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
@@ -865,8 +872,8 @@ adapters.forEach(function (adapter) {
         return db.get('doc1');
       }).then(function (doc) {
         doc._attachments['newatt.txt'] = {
-          content_type: "text/plain",
-          digest: digest,
+          content_type: 'text/plain',
+          digest,
           stub: true
         };
         return db.put(doc);
@@ -874,7 +881,7 @@ adapters.forEach(function (adapter) {
         return db.allDocs();
       }).then(function (res) {
         // ok, now let's really delete them
-        var docs = [
+        const docs = [
           {
             _id: 'doc1',
             _rev: res.rows[0].value.rev
@@ -888,11 +895,11 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.compact();
       }).then(function () {
-        var doc = {
+        const doc = {
           _attachments: {
             'foo.txt': {
-              content_type: "text/plain",
-              digest: digest,
+              content_type: 'text/plain',
+              digest,
               stub: true
             }
           }
@@ -906,13 +913,13 @@ adapters.forEach(function (adapter) {
     });
 
     it('#2818 successive new_edits okay with attachments', function () {
-      var db = new PouchDB(dbs.name);
-      var docs = [{
-        '_id': 'foo',
-        '_rev': '1-x',
-        '_revisions': {
-          'start': 1,
-          'ids': ['x']
+      const db = new PouchDB(dbs.name);
+      const docs = [{
+        _id: 'foo',
+        _rev: '1-x',
+        _revisions: {
+          start: 1,
+          ids: ['x']
         },
         _attachments: {
           'att.txt': {
@@ -921,20 +928,20 @@ adapters.forEach(function (adapter) {
           }
         }
       }];
-      var digest;
-      return db.bulkDocs({docs: docs, new_edits: false}).then(function () {
-        return db.bulkDocs({docs: docs, new_edits: false});
+      let digest;
+      return db.bulkDocs({docs, new_edits: false}).then(function () {
+        return db.bulkDocs({docs, new_edits: false});
       }).then(function () {
         return db.get('foo', {attachments: true});
       }).then(function (doc) {
         doc._rev.should.equal('1-x');
         digest = doc._attachments['att.txt'].digest;
       }).then(function () {
-        var doc = {
+        const doc = {
           _attachments: {
             'foo.txt': {
-              content_type: "text/plain",
-              digest: digest,
+              content_type: 'text/plain',
+              digest,
               stub: true
             }
           }
@@ -946,7 +953,7 @@ adapters.forEach(function (adapter) {
     it.skip('#2818 Compaction really replaces attachments', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
       return db.put({
         _id: 'doc1',
         _attachments: {
@@ -1025,8 +1032,8 @@ adapters.forEach(function (adapter) {
     it('#2818 Many orphaned attachments', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var docs = [
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const docs = [
         {
           _id: 'doc1',
           _attachments: {
@@ -1090,17 +1097,17 @@ adapters.forEach(function (adapter) {
         }
       ];
 
-      var digestsToForget;
-      var digestsToRemember;
+      let digestsToForget;
+      let digestsToRemember;
       return db.bulkDocs(docs).then(function () {
         return db.compact();
       }).then(function () {
         return db.allDocs({include_docs: true});
       }).then(function (res) {
-        var allAtts = {};
+        const allAtts = {};
         res.rows.forEach(function (row) {
           Object.keys(row.doc._attachments).forEach(function (attName) {
-            var att = row.doc._attachments[attName];
+            const att = row.doc._attachments[attName];
             allAtts[attName] = att.digest;
           });
         });
@@ -1126,42 +1133,44 @@ adapters.forEach(function (adapter) {
         return db.compact();
       }).then(function () {
         return PouchDB.utils.Promise.all(
-            digestsToRemember.map(function (digest) {
-          return db.post({
-            _attachments: {
-              'baz.txt' : {
-                stub: true,
-                digest: digest,
-                content_type: 'text/plain'
+          digestsToRemember.map(function (digest) {
+            return db.post({
+              _attachments: {
+                'baz.txt': {
+                  stub: true,
+                  digest,
+                  content_type: 'text/plain'
+                }
               }
-            }
-          });
-        }));
+            });
+          })
+        );
       }).then(function () {
         return PouchDB.utils.Promise.all(
-            digestsToForget.map(function (digest) {
-          return db.post({
-            _attachments: {
-              'baz.txt' : {
-                stub: true,
-                digest: digest,
-                content_type: 'text/plain'
+          digestsToForget.map(function (digest) {
+            return db.post({
+              _attachments: {
+                'baz.txt': {
+                  stub: true,
+                  digest,
+                  content_type: 'text/plain'
+                }
               }
-            }
-          }).then(function () {
-            throw new Error('shouldn\'t have gotten here');
-          }, function (err) {
-            err.status.should.equal(412);
-          });
-        }));
+            }).then(function () {
+              throw new Error('shouldn\'t have gotten here');
+            }, function (err) {
+              err.status.should.equal(412);
+            });
+          })
+        );
       });
     });
 
     it('#3092 atts should be ignored when _deleted - bulkDocs', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = { _id: 'doc1'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'doc1'};
       return db.put(doc).then(function (info) {
         doc._rev = info.rev;
         doc._deleted = true;
@@ -1175,7 +1184,7 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.post({
           _attachments: {
-            'baz.txt' : {
+            'baz.txt': {
               stub: true,
               digest: 'md5-xMpCOKC5I4INzFCab3WEmw==',
               content_type: 'application/octet-stream'
@@ -1192,8 +1201,8 @@ adapters.forEach(function (adapter) {
     it('#3091 atts should be ignored when _deleted - put', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var doc = { _id: 'doc1'};
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const doc = {_id: 'doc1'};
       return db.put(doc).then(function (info) {
         doc._rev = info.rev;
         doc._deleted = true;
@@ -1207,7 +1216,7 @@ adapters.forEach(function (adapter) {
       }).then(function () {
         return db.post({
           _attachments: {
-            'baz.txt' : {
+            'baz.txt': {
               stub: true,
               digest: 'md5-xMpCOKC5I4INzFCab3WEmw==',
               content_type: 'application/octet-stream'
@@ -1224,8 +1233,8 @@ adapters.forEach(function (adapter) {
     it('#3089 Many orphaned atts w/ parallel compaction', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
-      var docs = [
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
+      const docs = [
         {
           _id: 'doc1',
           _attachments: {
@@ -1289,15 +1298,15 @@ adapters.forEach(function (adapter) {
         }
       ];
 
-      var digestsToForget;
-      var digestsToRemember;
+      let digestsToForget;
+      let digestsToRemember;
       return db.bulkDocs(docs).then(function () {
         return db.allDocs({include_docs: true});
       }).then(function (res) {
-        var allAtts = {};
+        const allAtts = {};
         res.rows.forEach(function (row) {
           Object.keys(row.doc._attachments).forEach(function (attName) {
-            var att = row.doc._attachments[attName];
+            const att = row.doc._attachments[attName];
             allAtts[attName] = att.digest;
           });
         });
@@ -1314,7 +1323,7 @@ adapters.forEach(function (adapter) {
         ];
         return db.allDocs({keys: ['doc1', 'doc2']});
       }).then(function (res) {
-        var docs = res.rows.map(function (row) {
+        const docs = res.rows.map(function (row) {
           return {
             _deleted: true,
             _id: row.id,
@@ -1329,22 +1338,23 @@ adapters.forEach(function (adapter) {
           digestsToRemember.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
             });
-          }));
+          })
+        );
       }).then(function () {
         return PouchDB.utils.Promise.all(
           digestsToForget.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
@@ -1353,7 +1363,8 @@ adapters.forEach(function (adapter) {
             }, function (err) {
               err.status.should.equal(412);
             });
-          }));
+          })
+        );
       });
     });
 
@@ -1362,10 +1373,10 @@ adapters.forEach(function (adapter) {
       // which are all deleted in a single bulkDocs. This is to
       // hunt down race conditions in our orphan compaction.
 
-      var db = new PouchDB(dbs.name, {auto_compaction: false});
+      const db = new PouchDB(dbs.name, {auto_compaction: false});
 
-      var docs = [];
-      for (var i = 0; i < 100; i++) {
+      const docs = [];
+      for (let i = 0; i < 100; i++) {
         docs.push({
           _id: i.toString(),
           _attachments: {
@@ -1383,7 +1394,7 @@ adapters.forEach(function (adapter) {
         });
         return db.get(docs[0]._id);
       }).then(function (doc) {
-        var digest = doc._attachments['att1.txt'].digest;
+        const {digest} = doc._attachments['att1.txt'];
         docs.forEach(function (doc) {
           doc._deleted = true;
         });
@@ -1392,9 +1403,9 @@ adapters.forEach(function (adapter) {
         }).then(function () {
           return db.post({
             _attachments: {
-              'baz.txt' : {
+              'baz.txt': {
                 stub: true,
-                digest: digest,
+                digest,
                 content_type: 'text/plain'
               }
             }
@@ -1413,29 +1424,29 @@ adapters.forEach(function (adapter) {
     //
 
     it('Auto-compaction test', function (done) {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {_id: 'doc', val: '1'};
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {_id: 'doc', val: '1'};
       db.post(doc, function (err, res) {
-        var rev1 = res.rev;
+        const rev1 = res.rev;
         doc._rev = rev1;
         doc.val = '2';
         db.post(doc, function (err, res) {
-          var rev2 = res.rev;
+          const rev2 = res.rev;
           doc._rev = rev2;
           doc.val = '3';
           db.post(doc, function (err, res) {
-            var rev3 = res.rev;
-            db.get('doc', { rev: rev1 }, function (err) {
+            const rev3 = res.rev;
+            db.get('doc', {rev: rev1}, function (err) {
               err.status.should.equal(404, 'rev-1 should be missing');
               err.name.should.equal(
                 'not_found', 'rev-1 should be missing'
               );
-              db.get('doc', { rev: rev2 }, function (err) {
+              db.get('doc', {rev: rev2}, function (err) {
                 err.status.should.equal(404, 'rev-2 should be missing');
                 err.name.should.equal(
                   'not_found', 'rev-2 should be missing'
                 );
-                db.get('doc', { rev: rev3 }, function (err) {
+                db.get('doc', {rev: rev3}, function (err) {
                   done(err);
                 });
               });
@@ -1446,18 +1457,16 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('#3251 massively parallel autocompaction while getting', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
 
-      var doc = {_id: 'foo'};
+      const doc = {_id: 'foo'};
 
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
       }).then(function () {
+        let updatePromise = PouchDB.utils.Promise.resolve();
 
-        var updatePromise = PouchDB.utils.Promise.resolve();
-
-        for (var i  = 0; i < 20; i++) {
-
+        for (let i = 0; i < 20; i++) {
           updatePromise = updatePromise.then(function () {
             return db.put(doc).then(function (res) {
               doc._rev = res.rev;
@@ -1465,11 +1474,10 @@ adapters.forEach(function (adapter) {
           });
         }
 
-        var tasks = [updatePromise];
-        for (var ii = 0; ii < 300; ii++) {
-
-          var task = db.get('foo');
-          for (var j =0; j < 10; j++) {
+        const tasks = [updatePromise];
+        for (let ii = 0; ii < 300; ii++) {
+          let task = db.get('foo');
+          for (let j = 0; j < 10; j++) {
             task = task.then(function () {
               return new PouchDB.utils.Promise(function (resolve) {
                 setTimeout(resolve, Math.floor(Math.random() * 10));
@@ -1485,18 +1493,16 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('#3251 massively parallel autocompaction while allDocsing', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
 
-      var doc = {_id: 'foo'};
+      const doc = {_id: 'foo'};
 
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
       }).then(function () {
+        let updatePromise = PouchDB.utils.Promise.resolve();
 
-        var updatePromise = PouchDB.utils.Promise.resolve();
-
-        for (var i  = 0; i < 20; i++) {
-
+        for (let i = 0; i < 20; i++) {
           updatePromise = updatePromise.then(function () {
             return db.put(doc).then(function (res) {
               doc._rev = res.rev;
@@ -1504,11 +1510,10 @@ adapters.forEach(function (adapter) {
           });
         }
 
-        var tasks = [updatePromise];
-        for (var ii = 0; ii < 300; ii++) {
-
-          var task = db.allDocs({key: 'foo', include_docs: true});
-          for (var j =0; j < 10; j++) {
+        const tasks = [updatePromise];
+        for (let ii = 0; ii < 300; ii++) {
+          let task = db.allDocs({key: 'foo', include_docs: true});
+          for (let j = 0; j < 10; j++) {
             task = task.then(function () {
               return new PouchDB.utils.Promise(function (resolve) {
                 setTimeout(resolve, Math.floor(Math.random() * 10));
@@ -1524,9 +1529,9 @@ adapters.forEach(function (adapter) {
     });
 
     it.skip('#3251 massively parallel autocompaction while changesing', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
 
-      var doc = {_id: 'foo'};
+      const doc = {_id: 'foo'};
 
       // we know we're going to reach this because of all the changes()
       // we're doing at once
@@ -1535,11 +1540,9 @@ adapters.forEach(function (adapter) {
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
       }).then(function () {
+        let updatePromise = PouchDB.utils.Promise.resolve();
 
-        var updatePromise = PouchDB.utils.Promise.resolve();
-
-        for (var i  = 0; i < 20; i++) {
-
+        for (let i = 0; i < 20; i++) {
           updatePromise = updatePromise.then(function () {
             return db.put(doc).then(function (res) {
               doc._rev = res.rev;
@@ -1547,11 +1550,10 @@ adapters.forEach(function (adapter) {
           });
         }
 
-        var tasks = [updatePromise];
-        for (var ii = 0; ii < 300; ii++) {
-
-          var task = db.changes({include_docs: true});
-          for (var j =0; j < 10; j++) {
+        const tasks = [updatePromise];
+        for (let ii = 0; ii < 300; ii++) {
+          let task = db.changes({include_docs: true});
+          for (let j = 0; j < 10; j++) {
             task = task.then(function () {
               return new PouchDB.utils.Promise(function (resolve) {
                 setTimeout(resolve, Math.floor(Math.random() * 10));
@@ -1569,8 +1571,8 @@ adapters.forEach(function (adapter) {
     it('#3089 Many orphaned attachments w/ auto-compaction', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var docs = [
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const docs = [
         {
           _id: 'doc1',
           _attachments: {
@@ -1634,15 +1636,15 @@ adapters.forEach(function (adapter) {
         }
       ];
 
-      var digestsToForget;
-      var digestsToRemember;
+      let digestsToForget;
+      let digestsToRemember;
       return db.bulkDocs(docs).then(function () {
         return db.allDocs({include_docs: true});
       }).then(function (res) {
-        var allAtts = {};
+        const allAtts = {};
         res.rows.forEach(function (row) {
           Object.keys(row.doc._attachments).forEach(function (attName) {
-            var att = row.doc._attachments[attName];
+            const att = row.doc._attachments[attName];
             allAtts[attName] = att.digest;
           });
         });
@@ -1669,22 +1671,23 @@ adapters.forEach(function (adapter) {
           digestsToRemember.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
             });
-          }));
+          })
+        );
       }).then(function () {
         return PouchDB.utils.Promise.all(
           digestsToForget.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
@@ -1693,15 +1696,16 @@ adapters.forEach(function (adapter) {
             }, function (err) {
               err.status.should.equal(412);
             });
-          }));
+          })
+        );
       });
     });
 
     it('#3089 Many orphaned atts w/ parallel auto-compaction', function () {
       // now that we've established md5sum collisions,
       // we can use that to detect true attachment replacement
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var docs = [
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const docs = [
         {
           _id: 'doc1',
           _attachments: {
@@ -1765,15 +1769,15 @@ adapters.forEach(function (adapter) {
         }
       ];
 
-      var digestsToForget;
-      var digestsToRemember;
+      let digestsToForget;
+      let digestsToRemember;
       return db.bulkDocs(docs).then(function () {
         return db.allDocs({include_docs: true});
       }).then(function (res) {
-        var allAtts = {};
+        const allAtts = {};
         res.rows.forEach(function (row) {
           Object.keys(row.doc._attachments).forEach(function (attName) {
-            var att = row.doc._attachments[attName];
+            const att = row.doc._attachments[attName];
             allAtts[attName] = att.digest;
           });
         });
@@ -1790,7 +1794,7 @@ adapters.forEach(function (adapter) {
         ];
         return db.allDocs({keys: ['doc1', 'doc2']});
       }).then(function (res) {
-        var docs = res.rows.map(function (row) {
+        const docs = res.rows.map(function (row) {
           return {
             _deleted: true,
             _id: row.id,
@@ -1803,22 +1807,23 @@ adapters.forEach(function (adapter) {
           digestsToRemember.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
             });
-          }));
+          })
+        );
       }).then(function () {
         return PouchDB.utils.Promise.all(
           digestsToForget.map(function (digest) {
             return db.post({
               _attachments: {
-                'baz.txt' : {
+                'baz.txt': {
                   stub: true,
-                  digest: digest,
+                  digest,
                   content_type: 'text/plain'
                 }
               }
@@ -1827,13 +1832,14 @@ adapters.forEach(function (adapter) {
             }, function (err) {
               err.status.should.equal(412);
             });
-          }));
+          })
+        );
       });
     });
 
     it('#3089 Auto-compaction retains atts if unorphaned', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {
         _id: 'doc1',
         _attachments: {
           'deleteme.txt': {
@@ -1842,7 +1848,7 @@ adapters.forEach(function (adapter) {
           }
         }
       };
-      var digest;
+      let digest;
       return db.put(doc).then(function () {
         return db.get('doc1');
       }).then(function (doc) {
@@ -1867,8 +1873,8 @@ adapters.forEach(function (adapter) {
         return db.get('doc1');
       }).then(function (doc) {
         doc._attachments['newatt.txt'] = {
-          content_type: "text/plain",
-          digest: digest,
+          content_type: 'text/plain',
+          digest,
           stub: true
         };
         return db.put(doc);
@@ -1876,7 +1882,7 @@ adapters.forEach(function (adapter) {
         return db.allDocs();
       }).then(function (res) {
         // ok, now let's really delete them
-        var docs = [
+        const docs = [
           {
             _id: 'doc1',
             _rev: res.rows[0].value.rev
@@ -1888,11 +1894,11 @@ adapters.forEach(function (adapter) {
         ];
         return db.bulkDocs(docs);
       }).then(function () {
-        var doc = {
+        const doc = {
           _attachments: {
             'foo.txt': {
-              content_type: "text/plain",
-              digest: digest,
+              content_type: 'text/plain',
+              digest,
               stub: true
             }
           }
@@ -1906,13 +1912,13 @@ adapters.forEach(function (adapter) {
     });
 
     it('#2818 successive new_edits okay with attachments', function () {
-      var db = new PouchDB(dbs.name);
-      var docs = [{
-        '_id': 'foo',
-        '_rev': '1-x',
-        '_revisions': {
-          'start': 1,
-          'ids': ['x']
+      const db = new PouchDB(dbs.name);
+      const docs = [{
+        _id: 'foo',
+        _rev: '1-x',
+        _revisions: {
+          start: 1,
+          ids: ['x']
         },
         _attachments: {
           'att.txt': {
@@ -1921,20 +1927,20 @@ adapters.forEach(function (adapter) {
           }
         }
       }];
-      var digest;
-      return db.bulkDocs({docs: docs, new_edits: false}).then(function () {
-        return db.bulkDocs({docs: docs, new_edits: false});
+      let digest;
+      return db.bulkDocs({docs, new_edits: false}).then(function () {
+        return db.bulkDocs({docs, new_edits: false});
       }).then(function () {
         return db.get('foo', {attachments: true});
       }).then(function (doc) {
         doc._rev.should.equal('1-x');
         digest = doc._attachments['att.txt'].digest;
       }).then(function () {
-        var doc = {
+        const doc = {
           _attachments: {
             'foo.txt': {
-              content_type: "text/plain",
-              digest: digest,
+              content_type: 'text/plain',
+              digest,
               stub: true
             }
           }
@@ -1944,8 +1950,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Auto-compaction removes non-leaf revs (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return getRevisions(db, 'foo');
@@ -1963,8 +1969,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Auto-compaction removes non-leaf revs pt 2 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return db.put(doc);
@@ -1982,26 +1988,26 @@ adapters.forEach(function (adapter) {
     });
 
     it('Auto-compaction removes non-leaf revs pt 3 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
 
-      var docs = [
+      const docs = [
         {
           _id: 'foo',
           _rev: '1-a1',
-          _revisions: { start: 1, ids: [ 'a1' ] }
+          _revisions: {start: 1, ids: ['a1']}
         }, {
           _id: 'foo',
           _rev: '2-a2',
-          _revisions: { start: 2, ids: [ 'a2', 'a1' ] }
+          _revisions: {start: 2, ids: ['a2', 'a1']}
         }, {
           _id: 'foo',
           _deleted: true,
           _rev: '3-a3',
-          _revisions: { start: 3, ids: [ 'a3', 'a2', 'a1' ] }
+          _revisions: {start: 3, ids: ['a3', 'a2', 'a1']}
         }, {
           _id: 'foo',
           _rev: '1-b1',
-          _revisions: { start: 1, ids: [ 'b1' ] }
+          _revisions: {start: 1, ids: ['b1']}
         }
       ];
 
@@ -2009,7 +2015,7 @@ adapters.forEach(function (adapter) {
         return getRevisions(db, 'foo');
       }).then(function (docsAndRevs) {
         docsAndRevs.should.have.length(4);
-        var asMap = {};
+        const asMap = {};
         docsAndRevs.forEach(function (docAndRev) {
           asMap[docAndRev.rev] = docAndRev.doc;
         });
@@ -2022,8 +2028,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Auto-compaction removes non-leaf revs pt 4 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         doc._deleted = true;
@@ -2043,8 +2049,8 @@ adapters.forEach(function (adapter) {
     });
 
     it('Auto-compaction removes non-leaf revs pt 5 (#2807)', function () {
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
-      var doc = {_id: 'foo'};
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
+      const doc = {_id: 'foo'};
       return db.put(doc).then(function (res) {
         doc._rev = res.rev;
         return db.put(doc);
@@ -2067,10 +2073,10 @@ adapters.forEach(function (adapter) {
       // which are all deleted in a single bulkDocs. This is to
       // hunt down race conditions in our orphan compaction.
 
-      var db = new PouchDB(dbs.name, {auto_compaction: true});
+      const db = new PouchDB(dbs.name, {auto_compaction: true});
 
-      var docs = [];
-      for (var i = 0; i < 100; i++) {
+      const docs = [];
+      for (let i = 0; i < 100; i++) {
         docs.push({
           _id: i.toString(),
           _attachments: {
@@ -2088,16 +2094,16 @@ adapters.forEach(function (adapter) {
         });
         return db.get(docs[0]._id);
       }).then(function (doc) {
-        var digest = doc._attachments['att1.txt'].digest;
+        const {digest} = doc._attachments['att1.txt'];
         docs.forEach(function (doc) {
           doc._deleted = true;
         });
         return db.bulkDocs(docs).then(function () {
           return db.post({
             _attachments: {
-              'baz.txt' : {
+              'baz.txt': {
                 stub: true,
-                digest: digest,
+                digest,
                 content_type: 'text/plain'
               }
             }
@@ -2109,6 +2115,5 @@ adapters.forEach(function (adapter) {
         });
       });
     });
-
   });
 });

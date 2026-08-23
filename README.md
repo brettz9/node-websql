@@ -16,19 +16,19 @@ Usage
 ----
 
 ```js
-var openDatabase = require('websql-configurable');
+const openDatabase = require('websql-configurable');
 ```
 
 Create a SQLite3 database called `mydb.db`:
 
 ```js
-var db = openDatabase('mydb.db', '1.0', 'description', 1);
+const db = openDatabase('mydb.db', '1.0', 'description', 1);
 ```
 
 Create an in-memory database:
 
 ```js
-var db = openDatabase(':memory:', '1.0', 'description', 1);
+const db = openDatabase(':memory:', '1.0', 'description', 1);
 ```
 
 API
@@ -103,20 +103,20 @@ just [node-sqlite3](https://github.com/mapbox/node-sqlite3). Examples:
 To create your own custom implementation, use this API:
 
 ```js
-var customOpenDatabase = require('websql/custom');
+const customOpenDatabase = require('websql/custom');
 
 // The second argument is an optional options object
-var openDatabase = customOpenDatabase(SQLiteDatabase, {
-    sqlite: {
-        busyTimeout: 1000, // The default in ms
-        trace: cb,
-        profile: cb
-    },
-    websql: {
-        openDelay: cb, // Defaults to `immediate`
-        transactionDelay: cb, // Defaults to `immediate`
-        executeDelay: cb // Defaults to `immediate`
-    }
+const openDatabase = customOpenDatabase(SQLiteDatabase, {
+  sqlite: {
+    busyTimeout: 1000, // The default in ms
+    trace: cb,
+    profile: cb
+  },
+  websql: {
+    openDelay: cb, // Defaults to `immediate`
+    transactionDelay: cb, // Defaults to `immediate`
+    executeDelay: cb // Defaults to `immediate`
+  }
 });
 ```
 
@@ -125,13 +125,19 @@ with a constructor signature like so:
 
 ```js
 // takes two arguments: the database name and an optional options object
-var db = new SQLiteDatabase('dbname', {busyTimeout: 1000, trace: cb, profile: cb});
+const db = new SQLiteDatabase('dbname', {busyTimeout: 1000, trace: cb, profile: cb});
 ```
 
 Then it implements a single function, `exec()`, like so:
 
 ```js
-function exec(queries, readOnly, callback) {
+/**
+ *
+ * @param queries
+ * @param readOnly
+ * @param callback
+ */
+function exec (queries, readOnly, callback) {
   // queries: an array of SQL statements and queries, with a key "sql" and "args"
   // readOnly: whether or not these queries are in "read only" mode
   // callback: callback to be called with results (first arg is error, second arg is results)
@@ -213,7 +219,7 @@ Or:
 
 ```js
 {
-  error: new Error('whoopsie')
+  new Error('whoopsie');
 }
 ```
 

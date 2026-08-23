@@ -1,20 +1,23 @@
 import Promise from 'bluebird';
-import assert from 'assert';
+import assert from 'node:assert';
 
 import openDatabase from '../lib/index.js';
 
 Promise.longStackTraces();
 
-function expectError(promise) {
+/**
+ *
+ * @param promise
+ */
+function expectError (promise) {
   return promise.then(function () {
     throw new Error('expected an error');
   }, function (err) {
-    assert(err, 'error was thrown');
+    assert.ok(err, 'error was thrown');
   });
 }
 
 describe('basic test suite', function () {
-
   this.timeout(60000);
 
   it('throw error for openDatabase args < 1', function () {
@@ -40,7 +43,7 @@ describe('basic test suite', function () {
   });
 
   it('does a basic database operation', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('SELECT 1 + 1', [], function (txn, result) {
@@ -57,7 +60,7 @@ describe('basic test suite', function () {
   });
 
   it('handles an error - select', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return expectError(new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('SELECT foo FROM yolo', [], function (txn, result) {
@@ -70,7 +73,7 @@ describe('basic test suite', function () {
   });
 
   it('handles an error - drop', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return expectError(new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('DROP TABLE blargy blah', [], function (txn, result) {
@@ -83,7 +86,7 @@ describe('basic test suite', function () {
   });
 
   it('handles an error - delete', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return expectError(new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('DELETE FROM yolo', [], function (txn, result) {
@@ -96,7 +99,7 @@ describe('basic test suite', function () {
   });
 
   it('handles an error - create', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return expectError(new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('CREATE TABLE blargy blah', [], function (txn, result) {
@@ -109,7 +112,7 @@ describe('basic test suite', function () {
   });
 
   it('handles an error - insert', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return expectError(new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('INSERT INTO blargy blah', [], function (txn, result) {
@@ -122,7 +125,7 @@ describe('basic test suite', function () {
   });
 
   it('does multiple queries', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('SELECT 1 + 1', [], function (txn, result) {
@@ -153,12 +156,15 @@ describe('basic test suite', function () {
   });
 
   it('does multiple queries, same event loop', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
-        var results = new Array(2);
-        var done = 0;
-        function checkDone() {
+        const results = Array.from({length: 2});
+        let done = 0;
+        /**
+         *
+         */
+        function checkDone () {
           if (++done === 2) {
             resolve(results);
           }
@@ -177,7 +183,6 @@ describe('basic test suite', function () {
         }, function (txn, err) {
           reject(err);
         });
-
       });
     }).then(function (results) {
       assert.equal(results[0].rowsAffected, 0);
@@ -191,9 +196,9 @@ describe('basic test suite', function () {
   });
 
   it('calls transaction complete callback', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    let called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -216,9 +221,9 @@ describe('basic test suite', function () {
   });
 
   it('calls transaction complete callback - empty txn', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    const called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function () {
@@ -229,7 +234,7 @@ describe('basic test suite', function () {
   });
 
   it('calls transaction complete callback - null txn', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
     return expectError(new Promise(function (resolve, reject) {
       try {
@@ -241,9 +246,9 @@ describe('basic test suite', function () {
   });
 
   it('calls transaction error callback', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    let called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -271,9 +276,9 @@ describe('basic test suite', function () {
   });
 
   it('recovers from errors', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    let called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -301,9 +306,9 @@ describe('basic test suite', function () {
   });
 
   it('recovers from errors, returning undefined', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    let called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -330,9 +335,9 @@ describe('basic test suite', function () {
   });
 
   it('doesn\'t recover if you return true', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = 0;
+    let called = 0;
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -365,9 +370,9 @@ describe('basic test suite', function () {
   });
 
   it('queries executed in right order', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
 
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -418,20 +423,25 @@ describe('basic test suite', function () {
       }, reject, resolve);
     }).then(function () {
       assert.deepEqual(called,
-        ["a","k","b","l","c","j","m","n","e","i","f","h","o","g"]);
+        ['a', 'k', 'b', 'l', 'c', 'j', 'm', 'n', 'e', 'i', 'f', 'h', 'o', 'g']);
     });
   });
 
   it('has a version', function () {
-    var db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
     assert.equal(db.version, '1.0');
   });
-
 });
 
-function transactionPromise(db, sql, sqlArgs) {
+/**
+ *
+ * @param db
+ * @param sql
+ * @param sqlArgs
+ */
+function transactionPromise (db, sql, sqlArgs) {
   return new Promise(function (resolve, reject) {
-    var result;
+    let result;
     db.transaction(function (txn) {
       txn.executeSql(sql, sqlArgs, function (txn, res) {
         result = res;
@@ -442,9 +452,15 @@ function transactionPromise(db, sql, sqlArgs) {
   });
 }
 
-function readTransactionPromise(db, sql, sqlArgs) {
+/**
+ *
+ * @param db
+ * @param sql
+ * @param sqlArgs
+ */
+function readTransactionPromise (db, sql, sqlArgs) {
   return new Promise(function (resolve, reject) {
-    var result;
+    let result;
     db.readTransaction(function (txn) {
       txn.executeSql(sql, sqlArgs, function (txn, res) {
         result = res;
@@ -455,7 +471,11 @@ function readTransactionPromise(db, sql, sqlArgs) {
   });
 }
 
-function getInsertId(res) {
+/**
+ *
+ * @param res
+ */
+function getInsertId (res) {
   try {
     return res.insertId; // WebSQL will normally throw an error on access here
   } catch (err) {
@@ -466,7 +486,7 @@ function getInsertId(res) {
 describe('dedicated db test suite - in-memory', function () {
   this.timeout(60000);
 
-  var db;
+  let db;
 
   beforeEach(function () {
     db = openDatabase(':memory:', '1.0', 'yolo', 100000);
@@ -485,13 +505,13 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId 1', function () {
-    var sql = 'SELECT 1 + 1';
+    const sql = 'SELECT 1 + 1';
     return transactionPromise(db, sql).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 1, 'rows.length');
     }).then(function () {
-      var sql = 'SELECT 1 + 2';
+      const sql = 'SELECT 1 + 2';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
@@ -501,19 +521,19 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId 2', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId 1');
       assert.equal(res.rowsAffected, 0, '1 rowsAffected == ' + res.rowsAffected);
       assert.equal(res.rows.length, 0, 'rows.length');
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("foo", "bar")';
+      const sql = 'INSERT INTO table1 VALUES ("foo", "bar")';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 1, 'insertId 2');
       assert.equal(res.rowsAffected, 1, '2 rowsAffected == ' + res.rowsAffected);
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'SELECT * from table1';
+      const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
@@ -527,19 +547,19 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId 3', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("baz", "quux")';
+      const sql = 'INSERT INTO table1 VALUES ("baz", "quux")';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 1, 'insertId');
       assert.equal(res.rowsAffected, 1, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'SELECT * from table1';
+      const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
@@ -553,37 +573,37 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId 4', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("baz", "quux")';
+      const sql = 'INSERT INTO table1 VALUES ("baz", "quux")';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 1, 'insertId');
       assert.equal(res.rowsAffected, 1, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 2);
       assert.equal(res.rowsAffected, 1, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'UPDATE table1 SET text1 = "baz" WHERE text2 = "foobar";';
+      const sql = 'UPDATE table1 SET text1 = "baz" WHERE text2 = "foobar";';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId 1');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'UPDATE table1 SET text1 = "bongo" WHERE text2 = "haha";';
+      const sql = 'UPDATE table1 SET text1 = "bongo" WHERE text2 = "haha";';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
       assert.equal(res.rowsAffected, 1, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'SELECT * from table1';
+      const sql = 'SELECT * from table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId 2');
@@ -601,19 +621,19 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId 5', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId 1');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
     }).then(function () {
-      var sql = 'CREATE TABLE table2 (text1 string, text2 string)';
+      const sql = 'CREATE TABLE table2 (text1 string, text2 string)';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId 2');
       assert.equal(res.rowsAffected, 0, 'rowsAffected');
       assert.equal(res.rows.length, 0, 'rows.length');
-      var sql = 'CREATE TABLE table3 (text1 string, text2 string)';
+      const sql = 'CREATE TABLE table3 (text1 string, text2 string)';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), 0, 'insertId 3');
@@ -623,19 +643,19 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId - delete', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'DELETE FROM table1';
+      const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'DELETE FROM table1';
+      const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
@@ -645,22 +665,22 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId - delete 2', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'DELETE FROM table1';
+      const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
       assert.equal(res.rowsAffected, 0);
       assert.equal(res.rows.length, 0);
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("baz", "bar")';
+      const sql = 'INSERT INTO table1 VALUES ("baz", "bar")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'DELETE FROM table1';
+      const sql = 'DELETE FROM table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
@@ -670,10 +690,10 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId - drop 1', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'DROP TABLE table1';
+      const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
@@ -683,13 +703,13 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId - drop 2', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'DROP TABLE table1';
+      const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
@@ -699,16 +719,16 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('returns correct rowsAffected/insertId - drop 3', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("baz", "bar")';
+      const sql = 'INSERT INTO table1 VALUES ("baz", "bar")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'DROP TABLE table1';
+      const sql = 'DROP TABLE table1';
       return transactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0);
@@ -718,13 +738,13 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('valid read transaction', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'SELECT * from table1';
+      const sql = 'SELECT * from table1';
       return readTransactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId 2');
@@ -738,28 +758,28 @@ describe('dedicated db test suite - in-memory', function () {
   });
 
   it('throws error for writes during read-only transaction', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("quux", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("quux", "haha")';
       return expectError(readTransactionPromise(db, sql));
     });
   });
 
   it('query ignored for invalid read-only transaction write', function () {
-    var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+    const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
     return transactionPromise(db, sql).then(function () {
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("toto", "haha")';
       return transactionPromise(db, sql);
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("quux", "haha")';
+      const sql = 'INSERT INTO table1 VALUES ("quux", "haha")';
       return expectError(readTransactionPromise(db, sql));
     }).then(function () {
-      var sql = 'SELECT * from table1';
+      const sql = 'SELECT * from table1';
       return readTransactionPromise(db, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId 2');
@@ -774,10 +794,9 @@ describe('dedicated db test suite - in-memory', function () {
 });
 
 describe('dedicated db test suite - actual DB', function () {
-
   this.timeout(60000);
 
-  var db;
+  let db;
 
   beforeEach(function () {
     db = openDatabase('testdb', '1.0', 'yolo', 100000);
@@ -797,17 +816,17 @@ describe('dedicated db test suite - actual DB', function () {
 
 
   it('stores data between two DBs', function () {
-    var db1 = openDatabase('testdb', '1.0', 'yolo', 100000);
-    var db2 = openDatabase('testdb', '1.0', 'yolo', 100000);
+    const db1 = openDatabase('testdb', '1.0', 'yolo', 100000);
+    const db2 = openDatabase('testdb', '1.0', 'yolo', 100000);
 
     return Promise.resolve().then(function () {
-      var sql = 'CREATE TABLE table1 (text1 string, text2 string)';
+      const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
       return transactionPromise(db1, sql);
     }).then(function () {
-      var sql = 'INSERT INTO table1 VALUES ("foo", "bar")';
+      const sql = 'INSERT INTO table1 VALUES ("foo", "bar")';
       return transactionPromise(db1, sql);
     }).then(function () {
-      var sql = 'SELECT * from table1;';
+      const sql = 'SELECT * from table1;';
       return transactionPromise(db1, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
@@ -817,7 +836,7 @@ describe('dedicated db test suite - actual DB', function () {
         text1: 'foo',
         text2: 'bar'
       });
-      var sql = 'SELECT * from table1;';
+      const sql = 'SELECT * from table1;';
       return transactionPromise(db2, sql);
     }).then(function (res) {
       assert.equal(getInsertId(res), void 0, 'no insertId');
@@ -832,10 +851,9 @@ describe('dedicated db test suite - actual DB', function () {
 });
 
 describe('advanced test suite - actual DB', function () {
-
   this.timeout(60000);
 
-  var db;
+  let db;
 
   beforeEach(function () {
     db = openDatabase('testdb', '1.0', 'yolo', 100000);
@@ -855,16 +873,20 @@ describe('advanced test suite - actual DB', function () {
     });
   });
 
-  function rowsToJson(res) {
-    var output = [];
-    for (var i = 0; i < res.rows.length; i++) {
+  /**
+   *
+   * @param res
+   */
+  function rowsToJson (res) {
+    const output = [];
+    for (let i = 0; i < res.rows.length; i++) {
       output.push(res.rows.item(i));
     }
     return JSON.parse(JSON.stringify(output));
   }
 
   it('handles errors and callback correctly 0', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -879,12 +901,12 @@ describe('advanced test suite - actual DB', function () {
         reject(err);
       }, resolve);
     }).then(function () {
-      assert.deepEqual(called, ["a", "b"]);
+      assert.deepEqual(called, ['a', 'b']);
     });
   });
 
   it('handles errors and callback correctly 1', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -910,12 +932,12 @@ describe('advanced test suite - actual DB', function () {
         reject(err);
       }, resolve);
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c","f"]);
+      assert.deepEqual(called, ['a', 'b', 'c', 'f']);
     });
   });
 
   it('handles errors and callback correctly 2', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -925,34 +947,34 @@ describe('advanced test suite - actual DB', function () {
         txn.executeSql('INSERT INTO table1 VALUES ("buzz")', [], function () {
           called.push('b');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'a': rowsToJson(res)});
+            called.push({a: rowsToJson(res)});
           });
           txn.executeSql('INSERT INTO table1 VALUES ("hey")', [], null, function () {
             called.push('c');
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'d': rowsToJson(res)});
+              called.push({d: rowsToJson(res)});
             });
             txn.executeSql('INSERT INTO table1 VALUES ("baz")', [], function () {
               called.push('f');
               txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-                called.push({'f': rowsToJson(res)});
+                called.push({f: rowsToJson(res)});
               });
             });
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'e': rowsToJson(res)});
+              called.push({e: rowsToJson(res)});
             });
           });
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'b': rowsToJson(res)});
+            called.push({b: rowsToJson(res)});
           });
           txn.executeSql('INSERT INTO table1 VALUES ("haha")', [], null, function () {
             called.push('e');
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'d': rowsToJson(res)});
+              called.push({d: rowsToJson(res)});
             });
           });
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'c': rowsToJson(res)});
+            called.push({c: rowsToJson(res)});
           });
         });
       }, function (err) {
@@ -961,24 +983,24 @@ describe('advanced test suite - actual DB', function () {
       }, resolve);
     }).then(function () {
       assert.deepEqual(called, [
-        "a",
-        "b",
+        'a',
+        'b',
         {
-          "a": [
-            { "bar": "buzz"}
+          a: [
+            {bar: 'buzz'}
           ]
         },
         {
-          "b": [
-            { "bar": "buzz"},
-            { "bar": "hey"}
+          b: [
+            {bar: 'buzz'},
+            {bar: 'hey'}
           ]
         },
         {
-          "c": [
-            { "bar": "buzz"},
-            { "bar": "hey"},
-            { "bar": "haha"}
+          c: [
+            {bar: 'buzz'},
+            {bar: 'hey'},
+            {bar: 'haha'}
           ]
         }
       ]);
@@ -986,7 +1008,7 @@ describe('advanced test suite - actual DB', function () {
   });
 
   it('handles errors and callback correctly 3', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -996,34 +1018,34 @@ describe('advanced test suite - actual DB', function () {
         txn.executeSql('INSERT INTO table1 VALUES ("buzz")', [], function () {
           called.push('b');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'a': rowsToJson(res)});
+            called.push({a: rowsToJson(res)});
           });
           txn.executeSql('INSERT INTO yolo VALUES ("hey")', [], null, function () {
             called.push('c');
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'d': rowsToJson(res)});
+              called.push({d: rowsToJson(res)});
             });
             txn.executeSql('INSERT INTO table1 VALUES ("baz")', [], function () {
               called.push('f');
               txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-                called.push({'f': rowsToJson(res)});
+                called.push({f: rowsToJson(res)});
               });
             });
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'e': rowsToJson(res)});
+              called.push({e: rowsToJson(res)});
             });
           });
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'b': rowsToJson(res)});
+            called.push({b: rowsToJson(res)});
           });
           txn.executeSql('INSERT INTO table1 VALUES ("haha")', [], null, function () {
             called.push('e');
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'d': rowsToJson(res)});
+              called.push({d: rowsToJson(res)});
             });
           });
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'c': rowsToJson(res)});
+            called.push({c: rowsToJson(res)});
           });
         });
       }, function (err) {
@@ -1032,55 +1054,53 @@ describe('advanced test suite - actual DB', function () {
       }, resolve);
     }).then(function () {
       assert.deepEqual(called, [
-          "a",
-          "b",
-          {
-            "a": [{"bar": "buzz"}]
-          },
-          "c",
-          {
-            "b": [{"bar": "buzz"}]
-          },
-          {
-            "c": [{"bar": "buzz"}, {"bar": "haha"}
-            ]
-          },
-          {
-            "d": [{"bar": "buzz"}, {"bar": "haha"}]
-          },
-          "f",
-          {
-            "e": [{"bar": "buzz"}, {"bar": "haha"}, {"bar": "baz"}]
-          },
-          {
-            "f": [{"bar": "buzz"}, {"bar": "haha"}, {"bar": "baz"}]
-          }
-        ]
-      );
+        'a',
+        'b',
+        {
+          a: [{bar: 'buzz'}]
+        },
+        'c',
+        {
+          b: [{bar: 'buzz'}]
+        },
+        {
+          c: [{bar: 'buzz'}, {bar: 'haha'}]
+        },
+        {
+          d: [{bar: 'buzz'}, {bar: 'haha'}]
+        },
+        'f',
+        {
+          e: [{bar: 'buzz'}, {bar: 'haha'}, {bar: 'baz'}]
+        },
+        {
+          f: [{bar: 'buzz'}, {bar: 'haha'}, {bar: 'baz'}]
+        }
+      ]);
     });
   });
 
   it('handles errors and callback correctly 4', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('CREATE TABLE table1 (bar text);', [], function () {
           called.push('a');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'1': rowsToJson(res)});
+            called.push({1: rowsToJson(res)});
           });
         });
         txn.executeSql('INSERT INTO table1 VALUES ("a")', [], function () {
           called.push('b');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'2': rowsToJson(res)});
+            called.push({2: rowsToJson(res)});
           });
         });
         txn.executeSql('INSERT INTO table1 VALUES ("c")', [], function () {
           called.push('c');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'3': rowsToJson(res)});
+            called.push({3: rowsToJson(res)});
           });
         });
         txn.executeSql('DROP TABLE table1', [], function () {
@@ -1089,51 +1109,49 @@ describe('advanced test suite - actual DB', function () {
         txn.executeSql('CREATE TABLE table1 (bar text);', [], function () {
           called.push('e');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'4': rowsToJson(res)});
+            called.push({4: rowsToJson(res)});
           });
         });
-
       }, function (err) {
         console.log(err);
         reject(err);
       }, resolve);
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c","d","e",{"1":[]},{"2":[]},{"3":[]},{"4":[]}]
-      );
+      assert.deepEqual(called, ['a', 'b', 'c', 'd', 'e', {1: []}, {2: []}, {3: []}, {4: []}]);
     });
   });
 
   it('handles errors and callback correctly 5', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
         txn.executeSql('CREATE TABLE table1 (bar text);', [], function () {
           called.push('a');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'1': rowsToJson(res)});
+            called.push({1: rowsToJson(res)});
           });
         });
         txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-          called.push({'z': rowsToJson(res)});
+          called.push({z: rowsToJson(res)});
         });
         txn.executeSql('INSERT INTO table1 VALUES ("a")', [], function () {
           called.push('b');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'2': rowsToJson(res)});
+            called.push({2: rowsToJson(res)});
           });
         });
         txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-          called.push({'x': rowsToJson(res)});
+          called.push({x: rowsToJson(res)});
         });
         txn.executeSql('INSERT INTO table1 VALUES ("b")', [], function () {
           called.push('c');
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'3': rowsToJson(res)});
+            called.push({3: rowsToJson(res)});
           });
         });
         txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-          called.push({'y': rowsToJson(res)});
+          called.push({y: rowsToJson(res)});
         });
         txn.executeSql('DROP TABLE table1', [], function () {
           called.push('d');
@@ -1148,54 +1166,52 @@ describe('advanced test suite - actual DB', function () {
           txn.executeSql('INSERT INTO table1 VALUES ("c")', [], function () {
             called.push('w');
             txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-              called.push({'v': rowsToJson(res)});
+              called.push({v: rowsToJson(res)});
             });
           });
           txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-            called.push({'4': rowsToJson(res)});
+            called.push({4: rowsToJson(res)});
           });
         });
         txn.executeSql('SELECT * FROM table1', [], function (txn, res) {
-          called.push({'x': rowsToJson(res)});
+          called.push({x: rowsToJson(res)});
         });
-
       }, function (err) {
         console.log(err);
         reject(err);
       }, resolve);
     }).then(function () {
       assert.deepEqual(called, [
-          "a",
-          { "z": []},
-          "b",
-          { "x": [{"bar": "a"}]},
-          "c",
-          { "y": [{"bar": "a"}, {"bar": "b"}]},
-          "d",
-          "expected error",
-          "e",
-          { "x": []},
-          { "1": []},
-          { "2": []},
-          { "3": []},
-          "w",
-          { "4": [{"bar": "c"}]},
-          { "v": [{"bar": "c"}]}
-        ]
-      );
+        'a',
+        {z: []},
+        'b',
+        {x: [{bar: 'a'}]},
+        'c',
+        {y: [{bar: 'a'}, {bar: 'b'}]},
+        'd',
+        'expected error',
+        'e',
+        {x: []},
+        {1: []},
+        {2: []},
+        {3: []},
+        'w',
+        {4: [{bar: 'c'}]},
+        {v: [{bar: 'c'}]}
+      ]);
     });
   });
 
   it('handles errors and callback correctly 6', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve) {
       try {
         db.transaction(function (txn) {
           called.push(1);
-          txn.executeSql("SELECT 1", [], function () {
+          txn.executeSql('SELECT 1', [], function () {
             called.push(2);
-            throw new Error("boom");
+            throw new Error('boom');
           }, function () {
             called.push(3);
             return true;
@@ -1215,7 +1231,7 @@ describe('advanced test suite - actual DB', function () {
   });
 
   it('rolls back after an error 1', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1246,12 +1262,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'c', [{foo: 'a'}]]);
     });
   });
 
   it('rolls back after an error 2', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1282,12 +1298,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'c', [{foo: 'a'}]]);
     });
   });
 
   it('rolls back after an error 3', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1330,12 +1346,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","d","c","e","f",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'd', 'c', 'e', 'f', [{foo: 'a'}]]);
     });
   });
 
   it('rolls back after an error 4', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1370,12 +1386,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","d",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'd', [{foo: 'a'}]]);
     });
   });
 
   it('rolls back after an error 5', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1413,12 +1429,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","d","e","f",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'd', 'e', 'f', [{foo: 'a'}]]);
     });
   });
 
   it('does not roll back if caught 1', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1455,12 +1471,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","d","g","e",[{"foo":"a"}]]);
+      assert.deepEqual(called, ['a', 'b', 'd', 'g', 'e', [{foo: 'a'}]]);
     });
   });
 
   it('does not roll back if caught 2', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1500,13 +1516,14 @@ describe('advanced test suite - actual DB', function () {
       });
     }).then(function () {
       assert.deepEqual(called, [
-        "a","b","d","g","e","f",[{"foo":"a"},
-          {"foo":"n"},{"foo":"o"},{"foo":"p"}]]);
+        'a', 'b', 'd', 'g', 'e', 'f', [{foo: 'a'},
+          {foo: 'n'}, {foo: 'o'}, {foo: 'p'}]
+      ]);
     });
   });
 
   it('does not roll back if caught 3', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1557,14 +1574,15 @@ describe('advanced test suite - actual DB', function () {
       });
     }).then(function () {
       assert.deepEqual(called, [
-        "a","b","d","g","e","h","i","j","k",
-        [{"foo":"a"},{"foo":"n"},{"foo":"o"},{"foo":"x"},
-          {"foo":"y"},{"foo":"z"}]]);
+        'a', 'b', 'd', 'g', 'e', 'h', 'i', 'j', 'k',
+        [{foo: 'a'}, {foo: 'n'}, {foo: 'o'}, {foo: 'x'},
+          {foo: 'y'}, {foo: 'z'}]
+      ]);
     });
   });
 
   it('query order matters 1', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1591,12 +1609,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["y","a","z",[{"foo":"y"}]]);
+      assert.deepEqual(called, ['y', 'a', 'z', [{foo: 'y'}]]);
     });
   });
 
   it('query order matters 2', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1626,12 +1644,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["y","a","z","c",[]]);
+      assert.deepEqual(called, ['y', 'a', 'z', 'c', []]);
     });
   });
 
   it('query order matters 3', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1654,12 +1672,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c",[]]);
+      assert.deepEqual(called, ['a', 'b', 'c', []]);
     });
   });
 
   it('query order matters 4', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1682,12 +1700,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","b","c",[]]);
+      assert.deepEqual(called, ['a', 'b', 'c', []]);
     });
   });
 
   it('query order matters 5', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1710,12 +1728,12 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","c","b",[{"foo":"y"}]]);
+      assert.deepEqual(called, ['a', 'c', 'b', [{foo: 'y'}]]);
     });
   });
 
   it('query order matters 6', function () {
-    var called = [];
+    const called = [];
 
     return new Promise(function (resolve, reject) {
       db.transaction(function (txn) {
@@ -1744,27 +1762,36 @@ describe('advanced test suite - actual DB', function () {
         }, reject, resolve);
       });
     }).then(function () {
-      assert.deepEqual(called, ["a","e","b","c","d",[{"foo":"x"}]]);
+      assert.deepEqual(called, ['a', 'e', 'b', 'c', 'd', [{foo: 'x'}]]);
     });
   });
 
   it('callback order 1', function () {
-    var called = [];
+    const called = [];
     return new Promise(function (resolve, reject) {
-      var numTransactions = 2;
-      var rejected;
-      function done() {
+      let numTransactions = 2;
+      let rejected;
+      /**
+       *
+       */
+      function done () {
         if (rejected) {
           return reject();
         }
         resolve();
       }
-      function resolveOne() {
+      /**
+       *
+       */
+      function resolveOne () {
         if (!--numTransactions) {
           done();
         }
       }
-      function rejectOne() {
+      /**
+       *
+       */
+      function rejectOne () {
         rejected = true;
         if (!--numTransactions) {
           done();
@@ -1804,30 +1831,39 @@ describe('advanced test suite - actual DB', function () {
         called.push('p');
       }, rejectOne, resolveOne);
     }).then(function () {
-      var expected = [
-        "a","m","b","j","l","c","e","g","i","k","d","f","h","n","p","o"
+      const expected = [
+        'a', 'm', 'b', 'j', 'l', 'c', 'e', 'g', 'i', 'k', 'd', 'f', 'h', 'n', 'p', 'o'
       ];
       assert.deepEqual(called, expected);
     });
   });
 
   it('callback order 2', function () {
-    var called = [];
+    const called = [];
     return new Promise(function (resolve, reject) {
-      var numTransactions = 7;
-      var rejected;
-      function done() {
+      let numTransactions = 7;
+      let rejected;
+      /**
+       *
+       */
+      function done () {
         if (rejected) {
           return reject();
         }
         resolve();
       }
-      function resolveOne() {
+      /**
+       *
+       */
+      function resolveOne () {
         if (!--numTransactions) {
           done();
         }
       }
-      function rejectOne() {
+      /**
+       *
+       */
+      function rejectOne () {
         rejected = true;
         if (!--numTransactions) {
           done();
@@ -1951,30 +1987,29 @@ describe('advanced test suite - actual DB', function () {
         called.push('14');
       }, rejectOne, resolveOne);
     }).then(function () {
-      var expected = ["a", "m", "1", "11", "ichi", "un", "onze", "b", "j",
-        "l", "c", "e", "g", "k", "d", "f", "n", "p", "o", "2", "8", "10",
-        "3", "5", "7", "9", "4", "6", "alpha", "eta", "iota", "beta",
-        "delta", "zeta", "theta", "gamma", "epsilon", "ni", "hachi", "juu",
-        "san", "go", "shichi", "kyuu", "shi", "roku", "deux", "huit", "dix",
-        "trois", "cinq", "sept", "neuf", "quatre", "six", "12", "14", "13"];
+      const expected = ['a', 'm', '1', '11', 'ichi', 'un', 'onze', 'b', 'j',
+        'l', 'c', 'e', 'g', 'k', 'd', 'f', 'n', 'p', 'o', '2', '8', '10',
+        '3', '5', '7', '9', '4', '6', 'alpha', 'eta', 'iota', 'beta',
+        'delta', 'zeta', 'theta', 'gamma', 'epsilon', 'ni', 'hachi', 'juu',
+        'san', 'go', 'shichi', 'kyuu', 'shi', 'roku', 'deux', 'huit', 'dix',
+        'trois', 'cinq', 'sept', 'neuf', 'quatre', 'six', '12', '14', '13'];
       assert.deepEqual(called, expected);
     });
   });
 
   it('callback order 3', function () {
-    var called = [];
+    const called = [];
     return new Promise(function (resolve) {
       called.push('a');
       var db2 = openDatabase('testdbs/testdb-' + Math.random(),
         '1.0', 'yolo', 1, function (db3) {
-        called.push('b');
-        resolve([db2, db3]);
-      });
+          called.push('b');
+          resolve([db2, db3]);
+        });
       called.push('c');
     }).then(function (dbs) {
-      assert(dbs[0] === dbs[1]);
+      assert.ok(dbs[0] === dbs[1]);
       assert.deepEqual(called, ['a', 'c', 'b']);
     });
   });
-
 });
