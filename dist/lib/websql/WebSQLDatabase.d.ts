@@ -1,5 +1,5 @@
 export default WebSQLDatabase;
-export type NonstandardTransCb = (currentTask: TransactionTask, err: Error | null, done: () => void, rollback: (err: Error | boolean, cb: () => void) => void, commit: (cb: () => void) => void) => boolean;
+export type NonstandardTransCb = (currentTask: TransactionTask, err: Error | null, done: (er?: Error | boolean | null) => void, rollback: (err: Error | boolean, cb: () => void) => void, commit: (cb: () => void) => void) => boolean;
 /**
  * The WebSQL `Database` object.
  */
@@ -37,8 +37,9 @@ declare class WebSQLDatabase {
      * @param {(trans: WebSQLTransaction) => void} txnCallback
      * @param {(err: Error) => void} [errorCallback]
      * @param {() => void} [successCallback]
+     * @param {NonstandardTransCb} [nonstandardTransCb]
      */
-    readTransaction(txnCallback: (trans: WebSQLTransaction) => void, errorCallback?: (err: Error) => void, successCallback?: () => void): void;
+    readTransaction(txnCallback: (trans: WebSQLTransaction) => void, errorCallback?: (err: Error) => void, successCallback?: () => void, nonstandardTransCb?: NonstandardTransCb): void;
     #private;
 }
 /**

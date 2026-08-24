@@ -1,4 +1,8 @@
-# Changelog
+# Changelog for `node-websql`
+
+## 3.0.6
+
+- fix: let `readTransaction()` defer finalization via `nonstandardTransCb`
 
 ## 3.0.5
 
