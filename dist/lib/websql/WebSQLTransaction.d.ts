@@ -27,10 +27,12 @@ export type SqlErrorCallback = (transaction: WebSQLTransaction, error: Error) =>
 declare class WebSQLTransaction {
     /**
      * @param {import('./WebSQLDatabase.js').default} websqlDatabase
+     * @param {import('./WebSQLDatabase.js').TransactionTask} task
      * @param {import('../types.js').Delay} [executeDelay]
      */
-    constructor(websqlDatabase: import("./WebSQLDatabase.js").default, executeDelay?: import("../types.js").Delay);
+    constructor(websqlDatabase: import("./WebSQLDatabase.js").default, task: import("./WebSQLDatabase.js").TransactionTask, executeDelay?: import("../types.js").Delay);
     _websqlDatabase: import("./WebSQLDatabase.js").default;
+    _task: import("./WebSQLDatabase.js").TransactionTask;
     /** @type {Error | null} */
     _error: Error | null;
     _complete: boolean;

@@ -14,9 +14,11 @@ declare class WebSQLDatabase {
     _db: import("../types.js").SqlDriver;
     /** @type {import('tiny-queue').default<TransactionTask>} */
     _txnQueue: import("tiny-queue").default<TransactionTask>;
-    _running: boolean;
+    _concurrentReaders: boolean;
+    /** @type {Set<TransactionTask>} */
+    _activeReaders: Set<TransactionTask>;
     /** @type {TransactionTask | null} */
-    _currentTask: TransactionTask | null;
+    _activeWriter: TransactionTask | null;
     _transactionDelay: typeof immediate | import("../types.js").Delay;
     _executeDelay: typeof immediate | import("../types.js").Delay;
     /**
