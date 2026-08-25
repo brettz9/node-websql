@@ -1,5 +1,9 @@
 # Changelog for `node-websql`
 
+## 3.1.0
+
+- feat: add opt-in, non-standard concurrentReaders mode for parallel readTransaction()s
+
 ## 3.0.6
 
 - fix: let `readTransaction()` defer finalization via `nonstandardTransCb`

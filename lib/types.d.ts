@@ -43,4 +43,17 @@ export interface WebSQLOverrides {
   openDelay?: Delay;
   transactionDelay?: Delay;
   executeDelay?: Delay;
+  /**
+   * Off by default, preserving the WebSQL spec's guarantee that queued
+   * transactions -- read or write alike -- run strictly one at a time, in
+   * the order requested (`WebSQLDatabase`'s own test suite depends on
+   * this). When explicitly enabled, any number of `readTransaction()`s
+   * may instead run concurrently (SQLite itself supports concurrent
+   * reads, and reads don't need atomicity against each other); a
+   * `transaction()` (read-write) still always runs with full exclusivity.
+   * Only meaningful for a consumer -- like IndexedDBShim -- that uses this
+   * library purely as an internal SQL execution engine and doesn't need
+   * (or expose) WebSQL's own strict-ordering guarantee itself.
+   */
+  concurrentReaders?: boolean;
 }

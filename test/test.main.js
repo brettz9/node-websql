@@ -2,6 +2,8 @@ import Promise from 'bluebird';
 import assert from 'node:assert';
 
 import openDatabase from '../lib/index.js';
+import customOpenDatabase from '../lib/custom.js';
+import SQLiteDatabase from '../lib/sqlite/SQLiteDatabase.js';
 
 Promise.longStackTraces();
 
@@ -2015,6 +2017,106 @@ describe('advanced test suite - actual DB', function () {
     }).then(function (dbs) {
       assert.ok(dbs[0] === dbs[1]);
       assert.deepEqual(called, ['a', 'c', 'b']);
+    });
+  });
+
+  it('concurrentReaders: true lets multiple readTransaction()s run concurrently', function () {
+    const called = [];
+    const openConcurrentDb = customOpenDatabase(SQLiteDatabase, {websql: {concurrentReaders: true}});
+    const db2 = openConcurrentDb('testdbs/testdb-' + Math.random(), '1.0', 'yolo', 100000);
+    return new Promise(function (resolve, reject) {
+      let numTransactions = 2;
+      let rejected;
+      /**
+       *
+       */
+      function resolveOne () {
+        if (!--numTransactions) {
+          if (rejected) {
+            reject();
+          } else {
+            resolve();
+          }
+        }
+      }
+      /**
+       *
+       */
+      function rejectOne () {
+        rejected = true;
+        resolveOne();
+      }
+
+      db2.readTransaction(function (txn) {
+        called.push('reader1-start');
+        txn.executeSql('SELECT 1 + 1', [], function () {
+          called.push('reader1-end');
+        });
+      }, rejectOne, resolveOne);
+      db2.readTransaction(function (txn) {
+        called.push('reader2-start');
+        txn.executeSql('SELECT 1 + 1', [], function () {
+          called.push('reader2-end');
+        });
+      }, rejectOne, resolveOne);
+    }).then(function () {
+      // Both readers were already running -- neither had finished -- by the
+      // time the second one started, proving they ran concurrently rather
+      // than the second waiting on the first's full completion.
+      assert.deepEqual(called.slice(0, 2), ['reader1-start', 'reader2-start']);
+    });
+  });
+
+  it('concurrentReaders: true still gives transaction() exclusivity over queued readers', function () {
+    const called = [];
+    const openConcurrentDb = customOpenDatabase(SQLiteDatabase, {websql: {concurrentReaders: true}});
+    const db2 = openConcurrentDb('testdbs/testdb-' + Math.random(), '1.0', 'yolo', 100000);
+    return new Promise(function (resolve, reject) {
+      let numTransactions = 3;
+      let rejected;
+      /**
+       *
+       */
+      function resolveOne () {
+        if (!--numTransactions) {
+          if (rejected) {
+            reject();
+          } else {
+            resolve();
+          }
+        }
+      }
+      /**
+       *
+       */
+      function rejectOne () {
+        rejected = true;
+        resolveOne();
+      }
+
+      db2.transaction(function (txn) {
+        called.push('writer-start');
+        txn.executeSql('SELECT 1 + 1', [], function () {
+          called.push('writer-end');
+        });
+      }, rejectOne, resolveOne);
+      db2.readTransaction(function (txn) {
+        called.push('reader1-start');
+        txn.executeSql('SELECT 1 + 1', [], function () {
+          called.push('reader1-end');
+        });
+      }, rejectOne, resolveOne);
+      db2.readTransaction(function (txn) {
+        called.push('reader2-start');
+        txn.executeSql('SELECT 1 + 1', [], function () {
+          called.push('reader2-end');
+        });
+      }, rejectOne, resolveOne);
+    }).then(function () {
+      // Both readers, though queued after the writer while
+      // `concurrentReaders` is on, still waited for the writer to finish
+      // rather than starting alongside it.
+      assert.deepEqual(called.slice(0, 2), ['writer-start', 'writer-end']);
     });
   });
 });
