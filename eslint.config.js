@@ -29,11 +29,9 @@ export default [
       'jsdoc/require-returns': 0,
       camelcase: 0,
 
-      // False positives: this only checks "dependencies", not
-      // "optionalDependencies" (where `sqlite3` deliberately lives, since
-      // it's swappable -- see README's "Custom SQLite3 bindings"), and it
-      // doesn't recognize packages typed only via our own `lib/ambient.d.ts`
-      // declarations (e.g. `tiny-queue`, which ships no types of its own).
+      // False positive: this doesn't recognize packages typed only via our
+      // own `lib/ambient.d.ts` declarations (e.g. `tiny-queue`, which ships
+      // no types of its own).
       'jsdoc/imports-as-dependencies': 0,
 
       // Library is heavy on callbacks

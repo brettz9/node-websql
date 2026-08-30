@@ -1883,7 +1883,10 @@ function compactTree (metadata) {
  * @param str
  */
 function quote (str) {
-  return "'" + str + "'";
+  // Double quotes (SQL identifier quoting), not single (string literal):
+  // better-sqlite3 builds SQLite with strict quoting (SQLITE_DQS=0), which
+  // will not accept a single-quoted string where a table name is expected.
+  return '"' + str + '"';
 }
 
 const ADAPTER_VERSION = 7; // used to manage migrations
@@ -2977,7 +2980,7 @@ function WebSqlPouch (opts, callback) {
    */
   function checkEncoding (tx, cb) {
     // UTF-8 on chrome/android, UTF-16 on safari < 7.1
-    tx.executeSql('SELECT HEX("a") AS hex', [], function (tx, res) {
+    tx.executeSql("SELECT HEX('a') AS hex", [], function (tx, res) {
       const {hex} = res.rows.item(0);
       encoding = hex.length === 2 ? 'UTF-8' : 'UTF-16';
       cb();
@@ -3098,8 +3101,10 @@ function WebSqlPouch (opts, callback) {
    * @param tx
    */
   function fetchVersion (tx) {
-    const sql = 'SELECT sql FROM sqlite_master WHERE tbl_name = ' + META_STORE;
-    tx.executeSql(sql, [], function (tx, result) {
+    // `META_STORE` is an identifier-quoted name (`"metadata-store"`); here it
+    // is needed as a string *value*, so pass the bare name as a bound param.
+    const sql = 'SELECT sql FROM sqlite_master WHERE tbl_name = ?';
+    tx.executeSql(sql, [META_STORE.replaceAll('"', '')], function (tx, result) {
       if (!result.rows.length) {
         // database hasn't even been created yet (version 0)
         onGetVersion(tx, 0);

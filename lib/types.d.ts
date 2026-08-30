@@ -1,8 +1,7 @@
 // This file is what every emitted public `.d.ts` (in dist/) type-only
 // imports via `import('../types.js')`, so it's also the anchor that pulls
-// `ambient.d.ts` (and, transitively, `sqlite3-augment.d.ts`) into a
-// *consumer's* program -- ambient `.d.ts` files aren't picked up from a
-// dependency's folder automatically otherwise.
+// `ambient.d.ts` into a *consumer's* program -- ambient `.d.ts` files
+// aren't picked up from a dependency's folder automatically otherwise.
 /// <reference path="./ambient.d.ts" />
 
 /** A single SQL statement plus its bound arguments, as queued for execution. */
