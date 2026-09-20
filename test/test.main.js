@@ -1,8 +1,12 @@
 import assert from 'node:assert';
 
+import immediate from 'immediate';
+
 import openDatabase from '../lib/index.js';
 import customOpenDatabase from '../lib/custom.js';
 import SQLiteDatabase from '../lib/sqlite/SQLiteDatabase.js';
+import WebSQLTransaction from '../lib/websql/WebSQLTransaction.js';
+import WebSQLResultSet from '../lib/websql/WebSQLResultSet.js';
 
 /**
  *
@@ -2116,6 +2120,73 @@ describe('advanced test suite - actual DB', function () {
       assert.deepEqual(called.slice(0, 2), ['writer-start', 'writer-end']);
     });
   });
+
+  it('nonstandardTransCb can observe and defer to the default commit/rollback handling', function () {
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const observed = [];
+    return new Promise(function (resolve, reject) {
+      db.transaction(function (txn) {
+        txn.executeSql('CREATE TABLE t (a)');
+      }, reject, function () {
+        observed.push('success');
+        resolve();
+      }, function (task, err) {
+        observed.push(err ? 'error' : 'clean');
+        return true; // let the default commit/rollback logic run
+      });
+    }).then(function () {
+      assert.deepEqual(observed, ['clean', 'success']);
+    });
+  });
+
+  it('nonstandardTransCb can commit manually, invoking the commit callback', function () {
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    let successCallbackCalled = false;
+    return new Promise(function (resolve, reject) {
+      db.transaction(function (txn) {
+        txn.executeSql('CREATE TABLE t (a)');
+      }, reject, function () {
+        successCallbackCalled = true;
+      }, function (task, err, done, rollback, commit) {
+        if (err) {
+          return true;
+        }
+        commit(function () {
+          assert.ok(successCallbackCalled);
+          resolve();
+        });
+        return false; // handled here; skip the default commit/rollback logic
+      });
+    });
+  });
+
+  it('nonstandardTransCb can roll back manually, invoking the rollback callback', function () {
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    let errorCallbackCalled = false;
+    return new Promise(function (resolve, reject) {
+      db.transaction(function (txn) {
+        txn.executeSql('SELECT yolo FROM baz', [], function () {
+          reject(new Error('unexpectedly succeeded'));
+        }, function () {
+          return true; // error unhandled -> propagates to nonstandardTransCb
+        });
+      }, function (err) {
+        assert.ok(err);
+        errorCallbackCalled = true;
+      }, function () {
+        reject(new Error('expected the error callback, not success'));
+      }, function (task, err, done, rollback) {
+        if (!err) {
+          return true;
+        }
+        rollback(err, function () {
+          assert.ok(errorCallbackCalled);
+          resolve();
+        });
+        return false; // handled here; skip the default commit/rollback logic
+      });
+    });
+  });
 });
 
 describe('SQLiteDatabase driver internals', function () {
@@ -2360,5 +2431,53 @@ describe('SQLiteDatabase driver internals', function () {
     w.close();
     r1.close();
     r2.close();
+  });
+});
+
+describe('WebSQLTransaction / WebSQLResultSet internals', function () {
+  it('surfaces a raw driver exec() failure through the transaction error callback', function () {
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    const driverError = new Error('driver boom');
+    db._db.exec = function (batch, readOnly, cb) {
+      cb(driverError);
+    };
+    return new Promise(function (resolve, reject) {
+      db.transaction(function (txn) {
+        txn.executeSql('SELECT 1 + 1');
+      }, function (err) {
+        assert.equal(err, driverError);
+        resolve();
+      }, function () {
+        reject(new Error('expected the transaction to error out'));
+      });
+    });
+  });
+
+  it('treats a driver exec() call with no error and no results as a failure', function () {
+    const db = openDatabase(':memory:', '1.0', 'yolo', 100000);
+    db._db.exec = function (batch, readOnly, cb) {
+      cb(null);
+    };
+    return new Promise(function (resolve, reject) {
+      db.transaction(function (txn) {
+        txn.executeSql('SELECT 1 + 1');
+      }, function (err) {
+        assert.equal(err.message, 'exec() did not return results');
+        resolve();
+      }, function () {
+        reject(new Error('expected the transaction to error out'));
+      });
+    });
+  });
+
+  it('defaults executeDelay to `immediate` when none is given', function () {
+    const txn = new WebSQLTransaction({}, {readOnly: true});
+    assert.equal(txn._executeDelay, immediate);
+  });
+
+  it('defaults rows to an empty WebSQLRows when none are given', function () {
+    const rs = new WebSQLResultSet(1, 0);
+    assert.equal(rs.rows.length, 0);
+    assert.equal(rs.rows.item(0), undefined);
   });
 });
