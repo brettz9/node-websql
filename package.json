@@ -72,7 +72,7 @@
   "c8": {
     "check-coverage": true,
     "lines": 100,
-    "function": 100,
+    "functions": 100,
     "statements": 100,
     "branches": 100
   },
