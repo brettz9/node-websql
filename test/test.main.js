@@ -1,11 +1,8 @@
-import Promise from 'bluebird';
 import assert from 'node:assert';
 
 import openDatabase from '../lib/index.js';
 import customOpenDatabase from '../lib/custom.js';
 import SQLiteDatabase from '../lib/sqlite/SQLiteDatabase.js';
-
-Promise.longStackTraces();
 
 /**
  *
@@ -23,23 +20,23 @@ describe('basic test suite', function () {
   this.timeout(60000);
 
   it('throw error for openDatabase args < 1', function () {
-    return expectError(Promise.resolve().then(function () {
+    return expectError(Promise.try(function () {
       openDatabase();
     }));
   });
   it('throw error for openDatabase args < 2', function () {
-    return expectError(Promise.resolve().then(function () {
+    return expectError(Promise.try(function () {
       openDatabase(':memory:');
     }));
   });
   it('throw error for openDatabase args < 3', function () {
-    return expectError(Promise.resolve().then(function () {
+    return expectError(Promise.try(function () {
       openDatabase(':memory:', 'yolo');
     }));
   });
 
   it('throw error for openDatabase args < 4', function () {
-    return expectError(Promise.resolve().then(function () {
+    return expectError(Promise.try(function () {
       openDatabase(':memory:', 'yolo', 'hey');
     }));
   });
@@ -824,7 +821,7 @@ describe('dedicated db test suite - actual DB', function () {
     const db1 = openDatabase('testdb', '1.0', 'yolo', 100000);
     const db2 = openDatabase('testdb', '1.0', 'yolo', 100000);
 
-    return Promise.resolve().then(function () {
+    return Promise.try(function () {
       const sql = 'CREATE TABLE table1 (text1 string, text2 string)';
       return transactionPromise(db1, sql);
     }).then(function () {
@@ -1781,7 +1778,7 @@ describe('advanced test suite - actual DB', function () {
        */
       function done () {
         if (rejected) {
-          reject();
+          reject(new Error('rejected'));
           return;
         }
         resolve();
@@ -1854,7 +1851,7 @@ describe('advanced test suite - actual DB', function () {
        */
       function done () {
         if (rejected) {
-          reject();
+          reject(new Error('rejected'));
           return;
         }
         resolve();
@@ -2033,7 +2030,7 @@ describe('advanced test suite - actual DB', function () {
       function resolveOne () {
         if (!--numTransactions) {
           if (rejected) {
-            reject();
+            reject(new Error('rejected'));
           } else {
             resolve();
           }
@@ -2080,7 +2077,7 @@ describe('advanced test suite - actual DB', function () {
       function resolveOne () {
         if (!--numTransactions) {
           if (rejected) {
-            reject();
+            reject(new Error('rejected'));
           } else {
             resolve();
           }

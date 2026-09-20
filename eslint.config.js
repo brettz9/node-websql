@@ -68,9 +68,7 @@ export default [
   {
     files: ['test/test.main.js'],
     rules: {
-      // `Promise` here is the imported `bluebird` package (`import Promise
-      // from 'bluebird'`), not the native global; `.longStackTraces()` is
-      // a real bluebird API, not native-prototype extension.
+      // `Promise.try`: https://github.com/dustinspecker/obj-props/pull/10
       'no-use-extend-native/no-use-extend-native': 0,
 
       // Deliberately empty transaction/query callbacks here, testing that

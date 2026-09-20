@@ -1,5 +1,5 @@
 import PouchDB from './pouchdb.js';
-import chai from 'chai';
+import * as chai from 'chai';
 import testUtils from './test.utils.js';
 import bigimage from './bigimage.js';
 

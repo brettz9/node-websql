@@ -1,14 +1,10 @@
-import bluebird from 'bluebird';
-import chai from 'chai';
+import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import denodeify from 'denodeify';
-import rimrafOriginal from 'rimraf';
-import mkdirp from 'mkdirp';
+import {rimraf} from 'rimraf';
+import {mkdirp} from 'mkdirp';
 
-bluebird.longStackTraces();
 chai.use(chaiAsPromised);
-const rimraf = denodeify(rimrafOriginal);
 
 // This can't use a top-level `await import(...)` below instead of the
 // `async function` here: Mocha loads the entry test file via a synchronous

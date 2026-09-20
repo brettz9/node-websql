@@ -1,6 +1,6 @@
 
 import PouchDB from './pouchdb.js';
-import chai from 'chai';
+import * as chai from 'chai';
 import testUtils from './test.utils.js';
 
 const should = chai.should();
