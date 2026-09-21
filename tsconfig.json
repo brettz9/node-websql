@@ -16,9 +16,6 @@
     "types": ["node"]
   },
   // "test/**/*.js",
-  // `index.d.ts` (not `@types/websql`) is this project's one source of the
-  // WebSQL spec's global types (SQLError, ObjectArray, Database, etc.) --
-  // having both in the same program declares SQLError/SQLException twice.
-  "include": ["lib/**/*.js", "lib/**/*.d.ts", "custom/**/*.js", "index.d.ts"],
+  "include": ["lib/**/*.js", "lib/**/*.d.ts", "custom/**/*.js"],
   "exclude": ["node_modules"]
 }

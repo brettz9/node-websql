@@ -14,7 +14,6 @@ import lie from 'lie';
 import pouchdbCollections from 'pouchdb-collections';
 import getArguments from 'argsarray';
 import events from 'node:events';
-import scopedEval from 'scope-eval';
 import pouchCollate from 'pouchdb-collate';
 const pouchCollate__default = _interopDefault(pouchCollate);
 import Md5 from 'spark-md5';
@@ -396,7 +395,11 @@ function isDeleted (metadata, rev) {
  * @param input
  */
 function evalFilter (input) {
-  return scopedEval('return ' + input + ';', {});
+  // `scope-eval`'s `return eval(source)` trick relies on a direct `eval()`
+  // letting a bare `return` inside it complete the enclosing function --
+  // current V8 rejects that as an "Illegal return statement", so parse
+  // `input` as a plain expression instead.
+  return new Function('return (' + input + ');')();
 }
 
 /**
@@ -6210,16 +6213,10 @@ function createView (opts) {
  * @param toJSON
  */
 function evalfunc (func, emit, sum, log, isArray, toJSON) {
-  return scopedEval(
-    'return (' + func.replace(/;\s*$/, '') + ');',
-    {
-      emit,
-      sum,
-      log,
-      isArray,
-      toJSON
-    }
-  );
+  // See `evalFilter` above for why this doesn't use `scope-eval`.
+  return new Function('emit', 'sum', 'log', 'isArray', 'toJSON',
+    'return (' + func.replace(/;\s*$/, '') + ');'
+  )(emit, sum, log, isArray, toJSON);
 }
 
 const promisedCallback$1 = function (promise, callback) {

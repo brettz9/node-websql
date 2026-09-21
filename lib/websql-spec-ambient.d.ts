@@ -7,6 +7,17 @@
 // Spec revision: 2010-11-18
 // NOTE: the W3C websql spec has been deprecated
 
+// This is this project's one source of the WebSQL spec's global ambient
+// types (SQLError, ObjectArray, Database, etc.) -- installing
+// `@types/websql` alongside it would declare SQLError/SQLException twice.
+// Like `browser-ambient.d.ts` (see its comment on `WindowDatabase`), this
+// file's raw source ships in the published package only as an inert
+// byproduct of `lib/` being published wholesale -- it's never emitted into
+// `dist/lib/` or reference-chained from any consumer-facing `.d.ts` there,
+// so no consumer's type resolution ever actually reaches it. It exists
+// solely so the local, full-project `tsc` run (`npm run tsc`) can
+// type-check `browser-ambient.d.ts`/`browser.js`.
+
 // uncomment to integrate with Window global object
 interface Window extends WindowDatabase { }
 interface WorkerUtils extends WorkerUtilsDatabase { }

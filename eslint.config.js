@@ -41,13 +41,10 @@ export default [
   {
     files: ['test/test.js'],
     rules: {
-      // Would be preferable to hoist the `await import(...)` calls to the
-      // module's top level instead of this async `describe()` callback,
-      // but Mocha loads its entry test file via a synchronous `require()`,
-      // which throws `ERR_REQUIRE_ASYNC_MODULE` for any ES module with
-      // top-level await -- tried it, confirmed it breaks the whole suite.
-      'mocha/no-async-suite': 0,
-      'sonarjs/synchronous-suite-callback': 0
+      // `RUN_LEGACY_TESTS` toggles the slow, vendored PouchDB adapter
+      // suite off by default -- test/CI configuration, not untrusted
+      // input (see the same override on `test/test.utils.js`).
+      'n/no-process-env': 0
     }
   },
   {

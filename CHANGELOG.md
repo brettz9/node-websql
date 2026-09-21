@@ -1,5 +1,21 @@
 # Changelog for `node-websql`
 
+## 4.1.0
+
+- fix: relocated index.d.ts to lib/websql-spec-ambient.d.ts, alongside its
+sibling ambient .d.ts files, and pointed package.json's stale top-level
+"types" field at the real generated dist/lib/index.d.ts (it was pointing
+at a file excluded from the published package).
+- test: make test.js's before/after cleanup hooks actually run
+- test: Two previously-swallowed problems in the legacy PouchDB
+adapter suite: missing inherits/through2 dependencies (not hoisted by
+pnpm since they were only transitive), and scope-eval's return-inside-
+eval trick throwing "Illegal return statement" under current V8, breaking
+every filter/map/reduce function evaluated by pouchdb-node.js and
+pouchdb-browser.js. Replaced scope-eval with plain `new Function(...)` in
+both files and dropped the now-unused dependency.
+- test: Slow suite is now gated behind RUN_LEGACY_TESTS instead of running by default.
+
 ## 4.0.0
 
 - **BREAKING:** swap the SQL engine from `sqlite3` to
