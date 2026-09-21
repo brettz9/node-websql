@@ -1380,10 +1380,12 @@ adapters.forEach(function (adapter) {
           const changes = db.changes(opts).
             on('change', function (change) {
               retChanges.results.push(change);
-              if (retChanges.results.length === 5) {
-                changes.cancel();
-                resolve(retChanges);
+              if (retChanges.results.length !== 5) {
+                return;
               }
+
+              changes.cancel();
+              resolve(retChanges);
             }).on('error', reject);
         });
       }
@@ -1518,10 +1520,12 @@ adapters.forEach(function (adapter) {
           const changes = db.changes(opts).
             on('change', function (change) {
               retChanges.results.push(change);
-              if (retChanges.results.length === 5) {
-                changes.cancel();
-                resolve(retChanges);
+              if (retChanges.results.length !== 5) {
+                return;
               }
+
+              changes.cancel();
+              resolve(retChanges);
             }).on('error', reject);
         });
       }

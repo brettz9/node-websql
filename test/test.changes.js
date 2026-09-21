@@ -24,10 +24,7 @@ adapters.forEach(function (adapter) {
       });
 
       //
-      if (result.length === 1) {
-        return result[0];
-      }
-      return undefined;
+      return result.length === 1 ? result[0] : undefined;
     }
 
     beforeEach(function (done) {
@@ -73,10 +70,12 @@ adapters.forEach(function (adapter) {
         let changeCount = 0;
         const promise = db.changes().on('change', function handler () {
           changeCount++;
-          if (changeCount === 5) {
-            promise.cancel();
-            promise.removeListener('change', handler);
+          if (changeCount !== 5) {
+            return;
           }
+
+          promise.cancel();
+          promise.removeListener('change', handler);
         });
         should.exist(promise);
         should.exist(promise.then);
@@ -1013,16 +1012,18 @@ adapters.forEach(function (adapter) {
         interval = setInterval(waitForDocPosted, 100);
       }).on('change', function () {
         count += 1;
-        if (count === 1) {
-          changes.cancel();
-          db.post({test: 'another doc'}, function (err) {
-            if (err) {
-              done(err);
-              return;
-            }
-            docPosted = true;
-          });
+        if (count !== 1) {
+          return;
         }
+
+        changes.cancel();
+        db.post({test: 'another doc'}, function (err) {
+          if (err) {
+            done(err);
+            return;
+          }
+          docPosted = true;
+        });
       });
       db.post({test: 'adoc'});
     });
@@ -1888,10 +1889,7 @@ adapters.forEach(function (adapter) {
       db.bulkDocs({docs: docs1}, function () {
         const changes = db.changes({
           filter (doc, req) {
-            if (req.query.abc) {
-              return doc.integer % 2 === 0;
-            }
-            return undefined;
+            return req.query.abc ? doc.integer % 2 === 0 : undefined;
           },
           query_params: params,
           live: true
@@ -2021,10 +2019,12 @@ adapters.forEach(function (adapter) {
             live: true
           }).on('change', function (change) {
             retChanges.push(change);
-            if (retChanges.length === 2) {
-              changes.cancel();
-              resolve(retChanges);
+            if (retChanges.length !== 2) {
+              return;
             }
+
+            changes.cancel();
+            resolve(retChanges);
           }).on('error', reject);
         });
       }).then(function (changes) {
@@ -2055,10 +2055,12 @@ adapters.forEach(function (adapter) {
             live: true
           }).on('change', function (change) {
             retChanges.push(change);
-            if (retChanges.length === 2) {
-              changes.cancel();
-              resolve(retChanges);
+            if (retChanges.length !== 2) {
+              return;
             }
+
+            changes.cancel();
+            resolve(retChanges);
           }).on('error', reject);
         });
       }).then(function (changes) {

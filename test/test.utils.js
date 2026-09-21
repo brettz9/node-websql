@@ -59,11 +59,9 @@ testUtils.couchHost = function () {
     return process.env.COUCH_HOST;
   }
 
-  if ('couchHost' in testUtils.params()) {
-    return testUtils.params().couchHost;
-  }
-
-  return 'http://localhost:5984';
+  return 'couchHost' in testUtils.params()
+    ? testUtils.params().couchHost
+    : 'http://localhost:5984';
 };
 
 // Abstracts constructing a Blob object, so it also works in older
@@ -163,10 +161,7 @@ testUtils.base64Blob = function (blob, callback) {
 // Prefix http adapter database names with their host and
 // node adapter ones with a db location
 testUtils.adapterUrl = function (adapter, name) {
-  if (adapter === 'http') {
-    return testUtils.couchHost() + '/' + name;
-  }
-  return name;
+  return adapter === 'http' ? testUtils.couchHost() + '/' + name : name;
 };
 
 // Delete specified databases
@@ -314,10 +309,7 @@ testUtils.promisify = function (fun, context) {
   return function (...args) {
     return new PouchDB.utils.Promise(function (resolve, reject) {
       args.push(function (err, res) {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(res);
+        return err ? reject(err) : resolve(res);
       });
       fun.apply(context, args);
     });

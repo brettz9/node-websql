@@ -1271,10 +1271,12 @@ adapters.forEach(function (adapters) {
               remote.put(doc1);
               return;
             }
-            if (count === 4) {
-              rep.cancel();
-              changes.cancel();
+            if (count !== 4) {
+              return;
             }
+
+            rep.cancel();
+            changes.cancel();
           }).on('complete', isFinished).on('error', done);
         });
       });
@@ -1309,10 +1311,12 @@ adapters.forEach(function (adapters) {
               db.put(doc1);
               return;
             }
-            if (count === 4) {
-              rep.cancel();
-              changes.cancel();
+            if (count !== 4) {
+              return;
             }
+
+            rep.cancel();
+            changes.cancel();
           }).on('complete', isFinished).on('error', done);
         });
       });
@@ -1799,10 +1803,9 @@ adapters.forEach(function (adapters) {
         let i = 0;
         remote.id = function (...args) {
         // Reject only the first 3 times
-          if (++i <= 3) {
-            return LocalPromise.reject(new Error('flunking you'));
-          }
-          return origId.apply(remote, args);
+          return ++i <= 3
+            ? LocalPromise.reject(new Error('flunking you'))
+            : origId.apply(remote, args);
         };
 
         return remote.post({}).then(function () {
@@ -2285,11 +2288,9 @@ adapters.forEach(function (adapters) {
             args.unshift(newDoc);
           }
 
-          if (this === source) {
-            return sourcePut.apply(this, args);
-          }
-
-          return targetPut.apply(this, args);
+          return this === source
+            ? sourcePut.apply(this, args)
+            : targetPut.apply(this, args);
         };
 
         const sourcePut = source.put;
@@ -2483,10 +2484,7 @@ adapters.forEach(function (adapters) {
           ];
           remote.bulkDocs({docs: myDocs}, {}, function () {
             const filterFun = function (doc, req) {
-              if (req.query.even) {
-                return doc.integer % 2 === 0;
-              }
-              return true;
+              return !req.query.even || (doc.integer % 2 === 0);
             };
             db.replicate.from(dbs.remote, {
               filter: filterFun,
@@ -2518,10 +2516,7 @@ adapters.forEach(function (adapters) {
           let filterFun;
           remote.bulkDocs({docs: myDocs}).then(function () {
             filterFun = function (doc, req) {
-              if (req.query.even) {
-                return doc.integer % 2 === 0;
-              }
-              return true;
+              return !req.query.even || (doc.integer % 2 === 0);
             };
             return db.replicate.from(dbs.remote, {
               filter: filterFun,

@@ -174,10 +174,7 @@ adapters.forEach(function (adapter) {
                   since: update_seq
                 }).on('complete', function (changes) {
                   const deleted_ids = changes.results.map(function (c) {
-                    if (c.deleted) {
-                      return c.id;
-                    }
-                    return undefined;
+                    return c.deleted ? c.id : undefined;
                   });
                   deleted_ids.should.include('1');
 

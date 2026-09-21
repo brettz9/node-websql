@@ -1142,49 +1142,51 @@ adapters.forEach(function (adapter) {
       });
     });
 
-    if (adapter === 'local') {
-      // TODO: this test fails in the http adapter in Chrome
-      it('should allow unicode doc ids', function (done) {
-        const db = new PouchDB(dbs.name);
-        const ids = [
-          // "PouchDB is awesome" in Japanese, contains 1-3 byte chars
-          '\u{30D1}\u{30A6}\u{30C1}\u{30E5}DB\u{306F}\u{6700}\u{9AD8}\u{3060}',
-          '\u{3B2}', // 2-byte utf-8 char: 3b2
-          '\u{20F2D}', // exotic 4-byte utf-8 char: 20f2d
-          '\u{0}foo\u{0}bar\u{1}baz\u{2}quux', // like mapreduce
-          '\u{0}',
-          '\u{30D1}'
-        ];
-        let numDone = 0;
-        ids.forEach(function (id) {
-          const doc = {_id: id, foo: 'bar'};
-          db.put(doc).then(function (info) {
-            doc._rev = info.rev;
-            return db.put(doc);
-          }).then(function () {
-            return db.get(id);
-          }).then(function (resp) {
-            resp._id.should.equal(id);
-            if (++numDone === ids.length) {
-              done();
-            }
-          }, done);
-        });
-      });
-
-      // this test only really makes sense for IDB
-      it('should have same blob support for 2 dbs', function () {
-        const db1 = new PouchDB(dbs.name);
-        return db1.info().then(function () {
-          const db2 = new PouchDB(dbs.name);
-          return db2.info().then(function () {
-            if (typeof db1._blobSupport !== 'undefined') {
-              db1._blobSupport.should.equal(db2._blobSupport,
-                'same blob support');
-            }
-          });
-        });
-      });
+    if (adapter !== 'local') {
+      return;
     }
+
+    // TODO: this test fails in the http adapter in Chrome
+    it('should allow unicode doc ids', function (done) {
+      const db = new PouchDB(dbs.name);
+      const ids = [
+        // "PouchDB is awesome" in Japanese, contains 1-3 byte chars
+        '\u{30D1}\u{30A6}\u{30C1}\u{30E5}DB\u{306F}\u{6700}\u{9AD8}\u{3060}',
+        '\u{3B2}', // 2-byte utf-8 char: 3b2
+        '\u{20F2D}', // exotic 4-byte utf-8 char: 20f2d
+        '\u{0}foo\u{0}bar\u{1}baz\u{2}quux', // like mapreduce
+        '\u{0}',
+        '\u{30D1}'
+      ];
+      let numDone = 0;
+      ids.forEach(function (id) {
+        const doc = {_id: id, foo: 'bar'};
+        db.put(doc).then(function (info) {
+          doc._rev = info.rev;
+          return db.put(doc);
+        }).then(function () {
+          return db.get(id);
+        }).then(function (resp) {
+          resp._id.should.equal(id);
+          if (++numDone === ids.length) {
+            done();
+          }
+        }, done);
+      });
+    });
+
+    // this test only really makes sense for IDB
+    it('should have same blob support for 2 dbs', function () {
+      const db1 = new PouchDB(dbs.name);
+      return db1.info().then(function () {
+        const db2 = new PouchDB(dbs.name);
+        return db2.info().then(function () {
+          if (typeof db1._blobSupport !== 'undefined') {
+            db1._blobSupport.should.equal(db2._blobSupport,
+              'same blob support');
+          }
+        });
+      });
+    });
   });
 });

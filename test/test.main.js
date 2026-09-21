@@ -326,10 +326,7 @@ describe('basic test suite', function () {
             txn.executeSql('SELECT yolo from baz', [], function () {
               called++;
             }, function (err) {
-              if (!err) {
-                return reject(new Error('expected an error here'));
-              }
-              return undefined;
+              return !err ? reject(new Error('expected an error here')) : undefined;
             });
           });
         });
@@ -356,10 +353,7 @@ describe('basic test suite', function () {
             txn.executeSql('SELECT yolo from baz', [], function () {
               called++;
             }, function (err) {
-              if (!err) {
-                return reject(new Error('expected an error here'));
-              }
-              return true;
+              return Boolean(err) || reject(new Error('expected an error here'));
             });
           });
         });

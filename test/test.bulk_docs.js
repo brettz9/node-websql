@@ -786,11 +786,13 @@ adapters.forEach(function (adapter) {
         } else {
           ids.push(res[0].id);
         }
-        if (++numDone === 2) {
-          errorNames.should.deep.equal(['conflict']);
-          ids.should.deep.equal([id]);
-          done();
+        if (++numDone !== 2) {
+          return;
         }
+
+        errorNames.should.deep.equal(['conflict']);
+        ids.should.deep.equal([id]);
+        done();
       }
       db1.bulkDocs({docs: [{_id: id}]}, callback);
       db2.bulkDocs({docs: [{_id: id}]}, callback);

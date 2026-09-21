@@ -3160,10 +3160,7 @@ function tests (suiteName, dbName, dbType, viewType) {
              */
             function getNext () {
               const task = tasks.shift();
-              if (task) {
-                return task().then(getNext);
-              }
-              return undefined;
+              return task ? task().then(getNext) : undefined;
             }
             return getNext();
           });
